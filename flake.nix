@@ -35,6 +35,7 @@
       machines = {
         work     = { system = "aarch64-darwin"; user = "john.memmott"; };
         personal = { system = "aarch64-darwin"; user = "ratiu5"; };
+        vm       = { system = "aarch64-darwin"; user = "admin"; }; # test VM
       };
       darwinSystems = [ "aarch64-darwin" "x86_64-darwin" ];
       forAllSystems = f: nixpkgs.lib.genAttrs darwinSystems f;

@@ -80,9 +80,19 @@ else
 fi
 
 # 5. Resolve the config label (same logic as the build scripts) ------------
-MACHINE="${MACHINE:-$($NIX eval --raw .#machines \
-  --apply 'ms: let m = builtins.filter (n: ms.${n}.user == "'"$(whoami)"'") (builtins.attrNames ms); in if m == [] then "" else builtins.head m' 2>/dev/null)}"
-[ -n "$MACHINE" ] || die "No machine in flake.nix matches user '$(whoami)'. Add one, or set MACHINE=<label>."
+ME="$(whoami)"
+if [ -z "${MACHINE:-}" ]; then
+  # `|| true` so a no-match (empty result) doesn't trip `set -e` silently.
+  MACHINE="$($NIX eval --raw .#machines \
+    --apply 'ms: let m = builtins.filter (n: ms.${n}.user == "'"$ME"'") (builtins.attrNames ms); in if m == [] then "" else builtins.head m' 2>/dev/null || true)"
+fi
+if [ -z "$MACHINE" ]; then
+  printf "${RED}No machine in flake.nix matches user '%s'.${NC}\n" "$ME" >&2
+  printf "${YELLOW}Add an entry to the machines map in flake.nix, e.g.:${NC}\n" >&2
+  printf "    %s = { system = \"aarch64-darwin\"; user = \"%s\"; };\n" "$ME" "$ME" >&2
+  printf "${YELLOW}then commit it (git add flake.nix) and re-run. Or override: MACHINE=<label> ./setup.sh${NC}\n" >&2
+  exit 1
+fi
 ok "Using config label: $MACHINE"
 
 # 6. Build and switch ------------------------------------------------------
