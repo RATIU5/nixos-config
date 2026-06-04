@@ -1,34 +1,27 @@
 _:
 
 [
-  # Development Tools
-  "claude"
-  "insomnia"
-  "tableplus"
-  "ngrok"
-  "postico"
-  "visual-studio-code"
-  "wireshark-app"
+  # Browsers (Safari is built-in)
+  "arc"
+  "zen"
 
-  # Communication Tools
-  "discord"
-  "loom"
-  "slack"
-  "telegram"
-  "zoom"
+  # Dev tools
+  "yaak" # OSS API client (Insomnia alternative)
 
-  # Utility Tools
-  "appcleaner"
-  "syncthing-app"
+  # Utilities
+  "1password"
+  "figma"
+  "tailscale"
 
-  # Entertainment Tools
-  "steam"
-  "vlc"
+  # Design / SEO
+  "affinity"
+  "screaming-frog-seo-spider"
 
-  # Productivity Tools
+  # Productivity
   "raycast"
-  "asana"
+  "setapp"
 
-  # Browsers
-  "google-chrome"
+  # Communication
+  "discord"
+  "zoom"
 ]

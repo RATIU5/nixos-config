@@ -1,138 +1,60 @@
 { pkgs, ... }:
 let
-  myPython = pkgs.python3.withPackages (ps: with ps; [
-    slpp
-    pip
-    rich
-    mysql-connector
-    virtualenv
-    black
-    requests
-    faker
-    textual
-    pyqt5
-    pyyaml
-    feedparser
-    python-dateutil
-  ]);
-
-  myPHP = pkgs.php82.withExtensions ({ enabled, all }: enabled ++ (with all; [
-    xdebug
-  ]));
-
   myFonts = import ./fonts.nix { inherit pkgs; };
 in
 with pkgs; [
-  # A
-  act # Run Github actions locally
-  age # File encryption tool
-  age-plugin-yubikey # YubiKey plugin for age encryption
+  # Secrets management (agenix)
+  age # File encryption tool agenix builds on
+  ssh-to-age # Convert SSH keys to age recipients/identities
+
+  # TUI / CLI tools
+  act # Run GitHub Actions locally
   aspell # Spell checker
   aspellDicts.en # English dictionary for aspell
-
-  # B
-  bash-completion # Bash completion scripts
   bat # Cat clone with syntax highlighting
+  biome # Web toolchain (formatter/linter)
   btop # System monitor and process viewer
-
-  # C
-  claude-code # Anthropic's AI coding assistant (native binary, from sadjow/claude-code-nix)
   coreutils # Basic file/text/shell utilities
-
-  # D
-  direnv # Environment variable management per directory
   difftastic # Structural diff tool
-  doctl # DigitalOcean CLI
+  direnv # Per-directory environment variables (wired via programs.direnv)
   dust # Disk usage analyzer
-
-  # F
+  eza # Modern ls replacement
   fd # Fast find alternative
   ffmpeg # Multimedia framework
-  flyctl # Fly.io tools
   fzf # Fuzzy finder
-
-  # G
-  go # Go
-  gcc # GNU Compiler Collection
   gh # GitHub CLI
+  gitleaks # Secret scanner
   glow # Markdown renderer for terminal
-  gnupg # GNU Privacy Guard
-  gopls # Go language server
-
-  # H
   htop # Interactive process viewer
-  hunspell # Spell checker
-
-  # I
   iftop # Network bandwidth monitor
-  imagemagick # Image manipulation toolkit
-  intelephense # PHP LSP server
-
-  # J
-  jetbrains.phpstorm # PHP IDE
-  jpegoptim # JPEG optimizer
   jq # JSON processor
-
-  # K
   killall # Kill processes by name
-  kubectl # Kubernetes CLI
-
-  # L
-  linear-cli # Linear project management CLI
-  lnav # Log file navigator
-  libfido2 # FIDO2 library
-
-  # M
-  myPHP # Custom PHP with extensions
-  myPython # Custom Python with packages
-
-  # N
-  ncurses # Terminal control library with terminfo database
-  ncdu # Disk space utility
+  lazygit # Terminal UI for git
+  mkcert # Local HTTPS certificates
   ngrok # Secure tunneling service
-  nodejs_24 # Node.js JavaScript runtime (includes npm)
-
-  # O
   openssh # SSH client and server
-
-  # P
   pandoc # Document converter
-  php82Packages.composer # PHP dependency manager
-  deployer # PHP deployment tool
-  php82Packages.php-cs-fixer # PHP code style fixer
-  phpstan # PHP static analysis tool
-  phpactor # PHP language server with better refactoring support
-  phpunit # PHP testing framework
-  pngquant # PNG compression tool
-
-  # Q
-  qt5.qtbase # Qt5 base library with platform plugins
-
-  # R
   ripgrep # Fast text search tool
-  repomix # AI tooling
-
-  # S
-  slack # Team communication app
-  sqlite # SQL database engine
-
-  # T
-  terraform # Infrastructure as code tool
-  terraform-ls # Terraform language server
-  tflint # Terraform linter
+  # starship is installed via programs.starship in home-manager.nix
   tmux # Terminal multiplexer
   tree # Directory tree viewer
-
-  # U
-  unrar # RAR archive extractor
   unzip # ZIP archive extractor
   uv # Python package installer
-
-  # W
   wget # File downloader
+  yazi # Terminal file manager
+  # zoxide is installed via programs.zoxide in home-manager.nix
 
-  # Z
-  zed-editor
-  zip # ZIP archive creator
-  zsh-powerlevel10k # Zsh theme
+  # Language toolchains
+  bun # JavaScript runtime / package manager
+  go # Go
+  nodejs_24 # Node.js (includes npm)
+  odin # Odin language compiler
+
+  # Editors
+  helix # Modal terminal editor
+  zed-editor # Zed editor
+
+  # Dev environments / containers
+  devenv # Reproducible per-project dev shells
+  podman # Daemonless container engine
 ] ++ myFonts

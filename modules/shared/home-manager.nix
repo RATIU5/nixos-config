@@ -1,8 +1,7 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, user, ... }:
 
-let name = "Dustin Lyons";
-    user = "dustin";
-    email = "dustin@dlyons.dev"; in
+let name = "John Memmott";
+    email = "jcmemmott20@outlook.com"; in
 {
 
   direnv = {
@@ -11,20 +10,25 @@ let name = "Dustin Lyons";
       nix-direnv.enable = true;
     };
 
+  zoxide = {
+    enable = true;
+    enableZshIntegration = true;
+  };
+
+  starship = {
+    enable = true;
+    enableZshIntegration = true;
+  };
+
   zsh = {
     enable = true;
     autocd = false;
     cdpath = [ "~/.local/share/src" ];
     plugins = [
       {
-          name = "powerlevel10k";
-          src = pkgs.zsh-powerlevel10k;
-          file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
-      }
-      {
-          name = "powerlevel10k-config";
-          src = lib.cleanSource ./config;
-          file = "p10k.zsh";
+          name = "zsh-autocomplete";
+          src = pkgs.zsh-autocomplete;
+          file = "share/zsh-autocomplete/zsh-autocomplete.plugin.zsh";
       }
     ];
     initContent = lib.mkBefore ''
@@ -35,12 +39,12 @@ let name = "Dustin Lyons";
 
       # Save and restore last directory
       LAST_DIR_FILE="$HOME/.zsh_last_dir"
-      
+
       # Save directory on every cd
       function chpwd() {
         echo "$PWD" > "$LAST_DIR_FILE"
       }
-      
+
       # Restore last directory on startup
       if [[ -f "$LAST_DIR_FILE" ]] && [[ -r "$LAST_DIR_FILE" ]]; then
         last_dir="$(cat "$LAST_DIR_FILE")"
@@ -66,23 +70,16 @@ let name = "Dustin Lyons";
       # Ripgrep alias
       alias search='rg -p --glob "!node_modules/*" --glob "!vendor/*" "$@"'
 
-      # Emacs is my editor
-      export ALTERNATE_EDITOR=""
-      export EDITOR="emacsclient -t"
-      export VISUAL="emacsclient -c -a emacs"
-      e() {
-          emacsclient -t "$@"
-      }
-      
-      # Laravel Artisan
-      alias art='php artisan'
+      # Helix is my editor
+      export EDITOR="helix"
+      export VISUAL="helix"
 
       # Use difftastic, syntax-aware diffing
       alias diff=difft
 
       # Always color ls and group directories
       alias ls='ls --color=auto'
-      
+
       # SSH wrapper functions with terminal color changes
       ssh-production() {
           # Change terminal background to dark red
@@ -91,7 +88,7 @@ let name = "Dustin Lyons";
           # Reset terminal background
           printf '\033]11;#1f2528\007'
       }
-      
+
       ssh-staging() {
           # Change terminal background to dark orange
           printf '\033]11;#3d2915\007'
@@ -99,7 +96,7 @@ let name = "Dustin Lyons";
           # Reset terminal background
           printf '\033]11;#1f2528\007'
       }
-      
+
       ssh-droplet() {
           # Change terminal background to dark green
           printf '\033]11;#153d15\007'
@@ -107,7 +104,7 @@ let name = "Dustin Lyons";
           # Reset terminal background
           printf '\033]11;#1f2528\007'
       }
-      
+
       # Override ssh command to detect known hosts
       ssh() {
           case "$1" in
@@ -137,7 +134,7 @@ let name = "Dustin Lyons";
                   ;;
           esac
       }
-      
+
       # Tmux aliases for devenv sessions
       alias atlas='tmux -S /run/user/1000/tmux-atlas attach -t atlas'
       alias conductly='tmux -S /run/user/1000/tmux-conductly attach -t conductly'
@@ -151,7 +148,7 @@ let name = "Dustin Lyons";
         # Reboot to Windows partition (Linux only)
         alias windows='sudo systemctl reboot --boot-loader-entry=auto-windows'
       ''}
-      
+
       # Screenshot function with path selection
       screenshot() {
           local project_path
@@ -159,28 +156,24 @@ let name = "Dustin Lyons";
               conductly|c)
                   project_path="/home/dustin/.local/share/src/conductly"
                   ;;
-              bitcoin-noobs|b)
-                  project_path="/home/dustin/.local/share/src/bitcoin-noobs"
-                  ;;
               *)
-                  echo "Usage: screenshot [conductly|c|bitcoin-noobs|b]"
+                  echo "Usage: screenshot [conductly|c]"
                   echo "  conductly (c) - Save to conductly project"
-                  echo "  bitcoin-noobs (b) - Save to bitcoin-noobs project"
                   return 1
                   ;;
           esac
-          
+
           # Prompt user for filename
           echo -n "Enter screenshot filename (without .png extension): "
           read -r user_filename
-          
+
           # Use user input or fallback to timestamp if empty
           if [[ -n "$user_filename" ]]; then
               local filename="$user_filename.png"
           else
               local filename="screenshot-$(date +'%Y%m%d-%H%M%S').png"
           fi
-          
+
           spectacle -r -b -o "$project_path/$filename"
           echo "Screenshot saved to: $project_path/$filename"
       }
@@ -493,7 +486,7 @@ let name = "Dustin Lyons";
       bind-key -T copy-mode-vi 'C-k' select-pane -U
       bind-key -T copy-mode-vi 'C-l' select-pane -R
       bind-key -T copy-mode-vi 'C-\' select-pane -l
-      
+
       # Darwin-specific fix for tmux 3.5a with sensible plugin
       # This MUST be at the very end of the config
       set -g default-command "$SHELL"

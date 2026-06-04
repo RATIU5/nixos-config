@@ -1,11 +1,6 @@
-{ config, pkgs, lib, home-manager, ... }:
+{ config, pkgs, lib, home-manager, user, ... }:
 
 let
-  user           = "dustin";
-  myEmacsLauncher = pkgs.writeScript "emacs-launcher.command" ''
-    #!/bin/sh
-    emacsclient -c -n &
-  '';
   sharedFiles     = import ../shared/files.nix { inherit config pkgs; };
   additionalFiles = import ./files.nix { inherit user config pkgs; };
 in
@@ -50,37 +45,27 @@ in
           file = lib.mkMerge [
             sharedFiles
             additionalFiles
-            { "emacs-launcher.command".source = myEmacsLauncher; }
           ];
           stateVersion = "23.11";
         };
-        programs = {} // import ../shared/home-manager.nix { inherit config pkgs lib; };
+        programs = {} // import ../shared/home-manager.nix { inherit config pkgs lib user; };
         manual.manpages.enable = false;
       };
   };
 
-  # Fully declarative dock using the latest from Nix Stor
+  # Fully declarative dock using the latest from Nix Store
   local.dock = {
     enable   = true;
     username = user;
     entries  = [
-      { path = "/Applications/Slack.app/"; }
       { path = "/System/Applications/Messages.app/"; }
-      { path = "${pkgs.alacritty}/Applications/Alacritty.app/"; }
+      { path = "${pkgs.ghostty-bin}/Applications/Ghostty.app/"; }
       { path = "/System/Applications/Music.app/"; }
       { path = "/System/Applications/Photos.app/"; }
       { path = "/System/Applications/Photo Booth.app/"; }
       { path = "/System/Applications/TV.app/"; }
-      { path = "${pkgs.jetbrains.phpstorm}/Applications/PhpStorm.app/"; }
-      { path = "/Applications/TablePlus.app/"; }
-      { path = "/Applications/Claude.app/"; }
       { path = "/Applications/Discord.app/"; }
-      { path = "/Applications/TickTick.app/"; }
       { path = "/System/Applications/Home.app/"; }
-      {
-        path    = toString myEmacsLauncher;
-        section = "others";
-      }
       {
         path    = "${config.users.users.${user}.home}/.local/share/";
         section = "others";
