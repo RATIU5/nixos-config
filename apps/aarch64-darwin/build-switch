@@ -5,14 +5,30 @@ YELLOW='\033[1;33m'
 RED='\033[1;31m'
 NC='\033[0m'
 
-# Resolve which machine config to build. Override with MACHINE=work|personal.
-if [ -z "$MACHINE" ]; then
-  case "$(whoami)" in
-    john.memmott) MACHINE="work" ;;
-    ratiu5)       MACHINE="personal" ;;
-    *) echo "${RED}Unknown user '$(whoami)'. Set MACHINE=work|personal.${NC}"; exit 1 ;;
+# Parse --no-secrets (build the agenix-free config variant) out of the args
+# so it isn't forwarded to nix/darwin-rebuild.
+SUFFIX=""
+ARGS=""
+for a in "$@"; do
+  case "$a" in
+    --no-secrets) SUFFIX="-no-secrets" ;;
+    *) ARGS="$ARGS $a" ;;
   esac
+done
+set -- $ARGS
+
+# Resolve the config label by matching $(whoami) against the `machines` map in
+# flake.nix (single source of truth). Override with MACHINE=<label>.
+if [ -z "$MACHINE" ]; then
+  ME="$(whoami)"
+  MACHINE="$(nix --extra-experimental-features 'nix-command flakes' eval --raw .#machines \
+    --apply 'ms: let m = builtins.filter (n: ms.${n}.user == "'"$ME"'") (builtins.attrNames ms); in if m == [] then "" else builtins.head m' 2>/dev/null)"
 fi
+if [ -z "$MACHINE" ]; then
+  echo "${RED}No machine in flake.nix matches user '$(whoami)'. Set MACHINE=<label> or add an entry to flake.nix.${NC}"
+  exit 1
+fi
+MACHINE="${MACHINE}${SUFFIX}"
 FLAKE_SYSTEM="darwinConfigurations.${MACHINE}.system"
 
 export NIXPKGS_ALLOW_UNFREE=1

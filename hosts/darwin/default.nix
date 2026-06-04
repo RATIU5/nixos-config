@@ -1,9 +1,10 @@
-{ agenix, config, pkgs, user, ... }:
+{ agenix, config, pkgs, lib, user, enableSecrets ? true, ... }:
 {
   imports = [
-    ../../modules/darwin/secrets.nix
     ../../modules/darwin/home-manager.nix
     ../../modules/shared
+  ] ++ lib.optionals enableSecrets [
+    ../../modules/darwin/secrets.nix
     agenix.darwinModules.default
   ];
   # Setup user, packages, programs

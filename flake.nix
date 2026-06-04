@@ -67,31 +67,43 @@
       };
     in
     {
+      # Exposed so the build scripts can resolve $(whoami) -> config label.
+      inherit machines;
       devShells = forAllSystems devShell;
       apps = nixpkgs.lib.genAttrs darwinSystems mkDarwinApps;
-      darwinConfigurations = nixpkgs.lib.mapAttrs (_: { system, user }:
-        darwin.lib.darwinSystem {
-          inherit system;
-          specialArgs = inputs // { inherit user; };
-          modules = [
-            home-manager.darwinModules.home-manager
-            nix-homebrew.darwinModules.nix-homebrew
-            {
-              nix-homebrew = {
-                inherit user;
-                enable = true;
-                taps = {
-                  "homebrew/homebrew-core" = homebrew-core;
-                  "homebrew/homebrew-cask" = homebrew-cask;
-                  "homebrew/homebrew-bundle" = homebrew-bundle;
-                };
-                mutableTaps = false;
-                autoMigrate = true;
-              };
-            }
-            ./hosts/darwin
-          ];
-        }
-      ) machines;
+      darwinConfigurations =
+        let
+          mkDarwin = { system, user, enableSecrets }:
+            darwin.lib.darwinSystem {
+              inherit system;
+              specialArgs = inputs // { inherit user enableSecrets; };
+              modules = [
+                home-manager.darwinModules.home-manager
+                nix-homebrew.darwinModules.nix-homebrew
+                {
+                  nix-homebrew = {
+                    inherit user;
+                    enable = true;
+                    taps = {
+                      "homebrew/homebrew-core" = homebrew-core;
+                      "homebrew/homebrew-cask" = homebrew-cask;
+                      "homebrew/homebrew-bundle" = homebrew-bundle;
+                    };
+                    mutableTaps = false;
+                    autoMigrate = true;
+                  };
+                }
+                ./hosts/darwin
+              ];
+            };
+          # For each machine: the normal config, plus a `<label>-no-secrets`
+          # variant that skips agenix (for first-boot testing).
+          withSecrets = nixpkgs.lib.mapAttrs
+            (_: m: mkDarwin (m // { enableSecrets = true; })) machines;
+          noSecrets = nixpkgs.lib.mapAttrs'
+            (name: m: nixpkgs.lib.nameValuePair "${name}-no-secrets"
+              (mkDarwin (m // { enableSecrets = false; }))) machines;
+        in
+        withSecrets // noSecrets;
     };
 }
