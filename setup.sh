@@ -59,6 +59,28 @@ if [ ! -f "$KEY" ]; then
 fi
 ok "Shared agenix key present"
 
+# 3b. Ensure ssh offers id_agenix for github.com -------------------------------
+# Nix's git fetch uses plain ssh, which won't offer id_agenix unless ~/.ssh/config
+# says to. On a fresh Mac there's no default key to fall back on, so the build
+# fails with "Permission denied (publickey)". Add the block once, idempotently.
+SSH_CONFIG="$HOME/.ssh/config"
+if [ ! -f "$SSH_CONFIG" ] || ! grep -qE '^[[:space:]]*Host[[:space:]]+github\.com([[:space:]]|$)' "$SSH_CONFIG"; then
+  info "Adding github.com -> id_agenix block to $SSH_CONFIG"
+  mkdir -p "$HOME/.ssh"
+  cat >> "$SSH_CONFIG" <<'EOF'
+
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_agenix
+  IdentitiesOnly yes
+EOF
+  chmod 600 "$SSH_CONFIG"
+  ok "ssh config updated"
+else
+  ok "ssh config already has a github.com entry"
+fi
+
 # 4. Sanity-check that the key can reach GitHub for the private nix-secrets input
 echo
 info "Checking GitHub access for the shared key (needed to pull nix-secrets)..."
