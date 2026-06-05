@@ -71,8 +71,8 @@ let name = "John Memmott";
       alias search='rg -p --glob "!node_modules/*" --glob "!vendor/*" "$@"'
 
       # Helix is my editor
-      export EDITOR="helix"
-      export VISUAL="helix"
+      export EDITOR="hx"
+      export VISUAL="hx"
 
       # Use difftastic, syntax-aware diffing
       alias diff=difft
