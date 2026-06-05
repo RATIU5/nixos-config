@@ -92,7 +92,7 @@
                       "homebrew/homebrew-core" = homebrew-core;
                       "homebrew/homebrew-cask" = homebrew-cask;
                       "homebrew/homebrew-bundle" = homebrew-bundle;
-                      "bobrwm/tap" = homebrew-bobrwm;
+                      "bobrwm/homebrew-tap" = homebrew-bobrwm;
                     };
                     mutableTaps = false;
                     autoMigrate = true;
