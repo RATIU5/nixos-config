@@ -50,8 +50,8 @@ fi
 command -v nix >/dev/null 2>&1 || die "nix not on PATH — open a new terminal and re-run ./setup.sh"
 ok "Nix available"
 
-# 3. SSH identity (agenix decrypts with ~/.ssh/id_ed25519) -----------------
-KEY="$HOME/.ssh/id_ed25519"
+# 3. SSH identity (agenix decrypts with ~/.ssh/id_agenix) ------------------
+KEY="$HOME/.ssh/id_agenix"
 if [ ! -f "$KEY" ]; then
   info "Generating SSH key at $KEY ..."
   mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"

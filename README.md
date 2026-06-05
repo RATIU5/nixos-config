@@ -1,538 +1,388 @@
-# General Purpose Nix Configuration (macOS + NixOS)
-[![Build Starter Template](https://github.com/dustinlyons/nixos-config/actions/workflows/build.yml/badge.svg)](https://github.com/dustinlyons/nixos-config/actions/workflows/build.yml)
-[![Statix Lint](https://github.com/dustinlyons/nixos-config/actions/workflows/lint.yml/badge.svg)](https://github.com/dustinlyons/nixos-config/actions/workflows/lint.yml)
+# nixos-config (macOS / nix-darwin)
 
-## Overview
-Hey, you made it! Welcome. 🤓
+Personal, declarative macOS configuration built on
+[nix-darwin](https://github.com/LnL7/nix-darwin) and
+[home-manager](https://github.com/nix-community/home-manager), using Nix Flakes.
 
-Nix is a powerful package manager for Linux and Unix systems that ensures reproducible, declarative, and reliable software management.
+A single command (`./setup.sh`) takes a fresh Mac — or a fresh macOS VM — from
+nothing to a fully configured machine: packages, Homebrew casks, dock, shell,
+git, and encrypted secrets (SSH keys, GPG signing key) via
+[agenix](https://github.com/ryantm/agenix).
 
-This repository contains configuration for a general-purpose development environment that runs Nix on macOS, NixOS, or both simultaneously.
+> Based on [dustinlyons/nixos-config](https://github.com/dustinlyons/nixos-config),
+> trimmed to macOS only and wired to a private `nix-secrets` repo.
 
-I use it daily on my 🧑🏻‍💻 Macbook Pro and an x86 PC in my home office. It also runs as a VM on your Mac. Many others have reported that it's working for them too.
+---
 
-Check out the step-by-step commands below to get started!
+## Contents
 
-## Table of Contents
+- [What you need before you start](#what-you-need-before-you-start)
+- [TL;DR — set up a new machine](#tldr--set-up-a-new-machine)
+- [Step by step](#step-by-step)
+- [How secrets work (read this once)](#how-secrets-work-read-this-once)
+- [First-time setup (creating the shared key + secrets)](#first-time-setup-creating-the-shared-key--secrets)
+- [Daily use](#daily-use)
+- [Managing secrets](#managing-secrets)
+- [Repository layout](#repository-layout)
+- [Troubleshooting](#troubleshooting)
 
-- [Nix Config for macOS + NixOS](#nix-config-for-macos--nixos)
-  - [Overview](#overview)
-  - [Table of Contents](#table-of-contents)
-  - [Features](#features)
-  - [Testimonials](#testimonials)
-  - [Videos](#videos)
-    - [macOS](#macos)
-      - [Updating dependencies with one command](#updating-dependencies-with-one-command)
-      - [Instant Emacs 30 thanks to daemon mode](#instant-emacs-30-thanks-to-daemon-mode)
-    - [NixOS](#nixos)
-  - [Disclaimer](#disclaimer)
-  - [Layout](#layout)
-  - [Installing](#installing)
-    - [For macOS (May 2026)](#for-macos-may-2026)
-      - [1. Install dependencies](#1-install-dependencies)
-      - [2. Install Nix](#2-install-nix)
-      - [3. Initialize a starter template](#3-initialize-a-starter-template)
-      - [4. Make apps executable](#4-make-apps-executable)
-      - [5. Apply your current user info](#5-apply-your-current-user-info)
-      - [6. Decide what packages to install](#6-decide-what-packages-to-install)
-      - [7. Review your shell configuration](#7-review-your-shell-configuration)
-      - [8. Optional: Setup secrets](#8-optional-setup-secrets)
-      - [9. Install configuration](#9-install-configuration)
-      - [10. Make changes](#10-make-changes)
-    - [For NixOS](#for-nixos)
-      - [1. Burn and use the latest ISO](#1-burn-and-use-the-latest-iso)
-      - [2. Optional: Setup secrets](#2-optional-setup-secrets)
-      - [3. Install configuration](#3-install-configuration)
-      - [4. Set user password](#4-set-user-password)
-  - [How to Create Secrets](#how-to-create-secrets)
-  - [Making Changes](#making-changes)
-      - [Development workflow](#development-workflow)
-      - [Trying packages](#trying-packages)
-  - [Compatibility and Feedback](#compatibility-and-feedback)
-    - [Platforms](#platforms)
-    - [Contributing](#contributing)
-    - [Feedback and Questions](#feedback-and-questions)
-    - [License](#license)
-  - [Appendix](#appendix)
-    - [Why Nix Flakes](#why-nix-flakes)
-    - [NixOS Components](#nixos-components)
-    - [Support](#support)
-    - [Stars](#stars)
+---
 
+## What you need before you start
 
+| Thing | Why | Where |
+|---|---|---|
+| A Mac (Apple Silicon or Intel) or a macOS VM | The target | — |
+| Internet access | Downloads Nix + packages | — |
+| A GitHub account with access to the config + `nix-secrets` repos | To clone them | github.com/RATIU5 |
+| **The shared agenix key** (`id_agenix`, *passphraseless*) | Decrypts your secrets; also pulls the private `nix-secrets` repo | **1Password** → "agenix shared key" |
+| (Optional) the GPG signing key | Signed git commits | 1Password |
 
-
-
-## Features
-- **Nix Flakes**: No confusing `configuration.nix` entry point, [no Nix channels](#why-nix-flakes)─ just `flake.nix`
-- **Same Environment Everywhere**: Easily share config across Linux and macOS (both Nix and Home Manager)
-- **macOS Dream Setup**: Fully declarative macOS (Apple / Intel) w/ UI, dock and macOS App Store apps
-- **Simple Bootstrap**: Simple Nix commands to start from zero, both x86 and macOS platforms
-- **Managed Homebrew**: Zero maintenance homebrew environment with `nix-darwin` and `nix-homebrew`
-- **Disk Management**: Declarative disk management with `disko`, say goodbye to disk utils
-- **Secrets Management**: Declarative secrets with `agenix` for SSH, PGP, syncthing, and other tools
-- **Super Fast Emacs**: Bleeding edge Emacs that fixes itself, thanks to a [community overlay](https://github.com/nix-community/emacs-overlay)
-- **Built In Home Manager**: `home-manager` module for seamless configuration (no extra clunky CLI steps)
-- **NixOS Environment**: Extensively configured NixOS including clean aesthetic + window animations
-- **Nix Overlays**: [Auto-loading of Nix overlays](https://github.com/dustinlyons/nixos-config/tree/main/overlays): drop a file in a dir and it runs _(great for patches!)_
-- **Declarative Sync**: No-fuss Syncthing: managed keys, certs, and configuration across all platforms
-- **Emacs Literate Configuration**: [Large Emacs literate configuration](https://github.com/dustinlyons/nixos-config/blob/main/modules/shared/config/emacs/config.org) to explore (if that's your thing)
-- **Simplicity and Readability**: Optimized for simplicity and readability in all cases, not small files everywhere
-- **Backed by Continuous Integration**: Flake auto updates weekly if changes don't break starter build
-
-## Testimonials
-
-![Screenshot 2024-10-31 at 9 32 38 AM](https://github.com/user-attachments/assets/0fb34422-adcb-41e3-b6a8-dcfebf0f40b8)
-
-![Screenshot 2024-10-31 at 11 07 07 AM](https://github.com/user-attachments/assets/53873d42-de6e-4368-9184-c9b71b6ebd01)
-
-![Screenshot 2024-10-31 at 9 33 27 AM](https://github.com/user-attachments/assets/eaf19ca6-2fb9-4536-98b6-8df70aa04039)
-
-![Screenshot 2024-10-31 at 11 00 11 AM](https://github.com/user-attachments/assets/8f306a62-5a89-4f10-ab08-c151e7951c27)
-
-![Screenshot 2025-01-28 at 1 56 59 PM](https://github.com/user-attachments/assets/14d29d81-53b1-4e0e-b8f7-189677e3a36c)
-
-## Videos
-### macOS
-#### Updating dependencies with one command
-https://github.com/dustinlyons/nixos-config/assets/1292576/2168d482-6eea-4b51-adc1-2ef1291b6598
-
-#### Instant Emacs 30 thanks to daemon mode
-- **GUI**
-
-https://github.com/dustinlyons/nixos-config/assets/1292576/66001066-2bbf-4492-bc9e-60ea1abeb987
-
-- **Terminal**
-
-https://github.com/dustinlyons/nixos-config/assets/1292576/d96f59ce-f540-4f14-bc61-6126a74f9f52
-
-### NixOS
-
-https://github.com/dustinlyons/nixos-config/assets/1292576/fa54a87f-5971-41ee-98ce-09be048018b8
-
-## Disclaimer
-Installing Nix on macOS will create an entirely separate volume. It may exceed many gigabytes in size.
-
-Some folks don't like this. If this is you, turn back now!
-
-> [!NOTE]
-> Don't worry, you can always [uninstall](https://github.com/DeterminateSystems/nix-installer#uninstalling) Nix later.
-
-## Layout
-```
-.
-├── apps         # Nix commands used to bootstrap and build configuration
-├── hosts        # Host-specific configuration
-├── modules      # macOS and nix-darwin, NixOS, and shared configuration
-├── overlays     # Drop an overlay file in this dir, and it runs. So far, mainly patches.
-├── templates    # Starter versions of this configuration
-```
-
-## Installing
-## For macOS (May 2026)
-This configuration supports both Intel and Apple Silicon Macs.
-
-### 1. Install dependencies
-```sh
-xcode-select --install
-```
-
-### 2. Install Nix
-
-```sh
-sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install)
-```
-
-After installation, open a new terminal session to make the `nix` executable available in your `$PATH`. You'll need this in the steps ahead.
+You do **not** need to install anything by hand first. `setup.sh` installs the
+Xcode Command Line Tools and Nix for you. The only thing you must supply is the
+**shared key**, and only if you want secrets.
 
 > [!IMPORTANT]
->
-> If you recently updated to macOS 15 Sequoia and are getting `error: the user '_nixbld1' in the group 'nixbld' does not exist` when running Nix commands, refer to GitHub issue [NixOS/nix#10892](https://github.com/NixOS/nix/issues/10892) for instructions to fix your installation without reinstalling.
+> The shared `id_agenix` **must have no passphrase**. agenix decrypts
+> non-interactively at every build; a passphrase would break that. See
+> [How secrets work](#how-secrets-work-read-this-once).
 
-### 3. Enable flakes and nix-command
+---
 
-[`flakes`](https://nixos.wiki/wiki/Flakes) and [`nix-command`](https://nixos.wiki/wiki/Nix_command) aren't available by default. You'll need to enable them.
-
-**Add this line to your `/etc/nix/nix.conf` file**
-```
-experimental-features = nix-command flakes
-```
-**_OR_**
-
-**Specify experimental features when using `nix run` below**
-```
-nix --extra-experimental-features 'nix-command flakes' run .#<command>
-```
-
-### 4. Initialize a starter template
-*Choose one of two options*
-
-**Simplified version without secrets management**
-* Great for beginners, enables you to get started quickly and test out Nix.
-* Forgoing secrets just means you must configure apps that depend on keys, passwords, etc., yourself.
-* You can always add secrets later.
+## TL;DR — set up a new machine
 
 ```sh
-mkdir -p nixos-config && cd nixos-config && nix flake --extra-experimental-features 'nix-command flakes' init -t github:dustinlyons/nixos-config#starter
+# 1. Get the repo
+git clone https://github.com/RATIU5/nixos-config.git ~/Developer/nixos-config
+cd ~/Developer/nixos-config
+
+# 2. (secrets machines only) drop the shared key from 1Password, then:
+#    paste private -> ~/.ssh/id_agenix , public -> ~/.ssh/id_agenix.pub
+mkdir -p ~/.ssh && chmod 700 ~/.ssh
+chmod 600 ~/.ssh/id_agenix
+chmod 644 ~/.ssh/id_agenix.pub
+
+# 3. Make sure this machine is in the flake (add an entry if missing — see Step 4)
+
+# 4. Run it
+./setup.sh
 ```
-**Full version with secrets management**
-* Choose this to add more moving parts for a 100% declarative configuration.
-* This template offers you a place to keep passwords, private keys, etc. *as part of your configuration*.
+
+Want to try the machine **without** secrets first? `./setup.sh --no-secrets`.
+
+---
+
+## Step by step
+
+### 1. Clone the repo
 
 ```sh
-mkdir -p nixos-config && cd nixos-config && nix flake --extra-experimental-features 'nix-command flakes' init -t github:dustinlyons/nixos-config#starter-with-secrets
+git clone https://github.com/RATIU5/nixos-config.git ~/Developer/nixos-config
+cd ~/Developer/nixos-config
 ```
 
-### 5. Make [apps](https://github.com/dustinlyons/nixos-config/tree/main/apps) executable
+HTTPS is used here so you can clone before any SSH key exists.
+
+### 2. Place the shared agenix key (skip if using `--no-secrets`)
+
+`setup.sh` uses `~/.ssh/id_agenix` both to decrypt secrets and to pull the
+private `nix-secrets` flake input. Get it from 1Password:
+
 ```sh
-find apps/$(uname -m | sed 's/arm64/aarch64/')-darwin -type f \( -name apply -o -name build -o -name build-switch -o -name create-keys -o -name copy-keys -o -name check-keys -o -name rollback \) -exec chmod +x {} \;
+mkdir -p ~/.ssh && chmod 700 ~/.ssh
+# paste the PRIVATE key body into:
+#   ~/.ssh/id_agenix
+# paste the PUBLIC key line into:
+#   ~/.ssh/id_agenix.pub
+chmod 600 ~/.ssh/id_agenix
+chmod 644 ~/.ssh/id_agenix.pub
 ```
-
-### 6. Apply your current user info
-Run this Nix command to replace stub values with your system properties, username, full name, and email.
-> Your email is only used in the `git` configuration.
-```sh
-nix run .#apply
-```
-> [!NOTE]
-> If you're using a git repository, only files in the working tree will be copied to the [Nix Store](https://zero-to-nix.com/concepts/nix-store).
->
-> You must run `git add .` first.
-
-### 7. Decide what packages to install
-You can search for packages on the [official NixOS website](https://search.nixos.org/packages).
-
-**Review these files**
-
-* [`modules/darwin/casks.nix`](https://github.com/dustinlyons/nixos-config/blob/main/modules/darwin/casks.nix)
-* [`modules/darwin/packages.nix`](https://github.com/dustinlyons/nixos-config/blob/main/modules/darwin/packages.nix)
-* [`modules/shared/packages.nix`](https://github.com/dustinlyons/nixos-config/blob/main/modules/shared/packages.nix)
-
-### 8. Review your shell configuration
-Add anything from your existing `~/.zshrc`, or just review the new configuration.
-
-**Review these files**
-
-* [`modules/darwin/home-manager`](https://github.com/dustinlyons/nixos-config/blob/main/modules/darwin/home-manager.nix)
-* [`modules/shared/home-manager`](https://github.com/dustinlyons/nixos-config/blob/main/modules/shared/home-manager.nix)
-
-### 9. Optional: Setup secrets
-If you are using the starter with secrets, there are a few additional steps.
-
-#### 9a. Create a private Github repo to hold your secrets
-In Github, create a private [`nix-secrets`](https://github.com/dustinlyons/nix-secrets-example) repository with at least one file (like a `README`). You'll enter this name during installation.
-
-#### 9b. Install keys
-Before generating your first build, these keys must exist in your `~/.ssh` directory. Don't worry, I provide a few commands to help you.
-
-| Key Name            | Platform         | Description                                                                              |
-|---------------------|------------------|------------------------------------------------------------------------------------------|
-| id_ed25519          | macOS / NixOS    | Github key with access to `nix-secrets`. Not copied to host, used only during bootstrap. |
-| id_ed25519_agenix   | macOS / NixOS    | Primary key for encrypting and decrypting secrets. Copied over to host as `id_ed25519`.  |
-
-Run one of these commands:
-
-##### Copy keys from USB drive
-This command auto-detects a USB drive connected to the current system.
-> Keys must be named `id_ed25519` and `id_ed25519_agenix`.
-```sh
-nix run .#copy-keys
-```
-
-##### Create new keys
-```sh
-nix run .#create-keys
-```
-> [!NOTE]
-> If you choose this option, make sure to [save the value](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account) of `id_ed25519.pub` to Github.
->
-> ```sh
-> cat /Users/$USER/.ssh/id_ed25519.pub | pbcopy # Copy key to clipboard
-> ```
-
-##### Check existing keys
-If you're rolling your own, just check they are installed correctly.
-```sh
-nix run .#check-keys
-```
-
-### 10. Install configuration
-Ensure the build works before deploying the configuration, run:
-```sh
-nix run .#build
-```
-> [!NOTE]
-> If you're using a git repository, only files in the working tree will be copied to the [Nix Store](https://zero-to-nix.com/concepts/nix-store).
->
-> You must run `git add .` first.
 
 > [!WARNING]
-> You may encounter `error: Unexpected files in /etc, aborting activation` if `nix-darwin` detects it will overwrite
-> an existing `/etc/` file. The error will list the files like this:
->
-> ```
-> The following files have unrecognized content and would be overwritten:
->
->   /etc/nix/nix.conf
->   /etc/bashrc
->
-> Please check there is nothing critical in these files, rename them by adding .before-nix-darwin to the end, and then try again.
-> ```
-> Backup and move the files out of the way and/or edit your Nix configuration before continuing.
+> If the private key file isn't `chmod 600`, SSH silently ignores it and you'll
+> get `Permission denied (publickey)`. This is the #1 gotcha.
 
-> [!WARNING]
-> You may encounter `error: Build user group has mismatching GID, aborting activation` if you have already upgraded to Sequoia but had not [prepared Nix](https://determinate.systems/posts/nix-support-for-macos-sequoia/) before that.
-> The error will list the files like this:
->
-> ```
-> error: Build user group has mismatching GID, aborting activation
-> The default Nix build user group ID was changed from 30000 to 350.
-> You are currently managing Nix build users with nix-darwin, but your
-> nixbld group has GID 350, whereas we expected 30000.
-> ```
->
-> You will have to [uninstall Nix](https://zero-to-nix.com/start/uninstall/), and [install Nix](https://zero-to-nix.com/start/install/) again with `--nix-build-group-id 30000` flag. See more here:
-> * [Nix Suppport for macOS Sequoia](https://determinate.systems/posts/nix-support-for-macos-sequoia/)
-> * [macOS 15 Sequoia clobbers _nixbld1-4 users](https://github.com/NixOS/nix/issues/10892)
-> * [macOS Sequoia replaces _nixbld{1,2,3,4} with system users causing darwin-rebuild to fail](https://github.com/LnL7/nix-darwin/issues/970)
+If you skip this step, `setup.sh` will **generate a brand-new** `id_agenix`.
+That new key is *not* a recipient of your existing secrets, so secrets won't
+decrypt until you register it (the per-host path — avoid it; use the shared key).
 
-### 11. Make changes
-Finally, alter your system with this command:
+### 3. Register the key with GitHub (once per key, not per machine)
+
+The shared key's public half must be on the GitHub account that owns
+`nix-secrets`, so Nix can pull it over SSH. If you reuse the same shared key
+everywhere, this is already done. To confirm:
+
 ```sh
+ssh -T git@github.com    # expect: "Hi RATIU5! You've successfully authenticated"
+```
+
+If it fails, add the key (needs the `gh` CLI, or do it in the GitHub web UI):
+
+```sh
+gh ssh-key add ~/.ssh/id_agenix.pub --title "$(hostname) $(date +%Y-%m)"
+```
+
+### 4. Make sure this machine is in `flake.nix`
+
+The build picks a config by matching your **username** against the `machines`
+map in `flake.nix`. If your user isn't there, add it and commit (Nix flakes only
+see git-tracked files):
+
+```nix
+# flake.nix → machines = { ... }
+yourusername = { system = "aarch64-darwin"; user = "yourusername"; };
+# use "x86_64-darwin" on Intel
+```
+
+```sh
+git add flake.nix && git commit -m "add machine: yourusername"
+```
+
+> You can override detection without editing the flake:
+> `MACHINE=<label> ./setup.sh`.
+
+### 5. Run the bootstrap
+
+```sh
+./setup.sh
+```
+
+What it does, in order:
+
+1. Installs **Xcode Command Line Tools** (gives you `git`). If it has to install
+   them, accept the GUI prompt and re-run `./setup.sh`.
+2. Installs **Nix** via the Determinate Systems installer (if not present), and
+   loads it into the current shell.
+3. Ensures `~/.ssh/id_agenix` exists (generates one only if missing).
+4. **Secrets registration prompt:** prints the SSH public key and the machine's
+   age recipient, then waits. With the **shared key already in place and on
+   GitHub, both are already done — just press Enter.** (The prompt exists for
+   the per-host model; you're using the shared model.)
+5. Resolves your config label from the `machines` map.
+6. Runs `nix run .#build-switch` to build and activate the system.
+
+When it finishes, open a new terminal to pick up the new environment.
+
+---
+
+## How secrets work (read this once)
+
+Secrets (your GitHub SSH key, GPG signing key, etc.) live **encrypted** in a
+separate private repo, `nix-secrets`, as `*.age` files. agenix decrypts them at
+build time and places them on disk (e.g. `~/.ssh/id_github`).
+
+Two facts drive everything:
+
+1. **To fetch `nix-secrets`,** Nix needs an SSH key authorized on GitHub.
+2. **To decrypt the `.age` files,** the machine needs a private key whose public
+   half is listed as a *recipient* in `nix-secrets/secrets.nix`. This is
+   cryptographic — no token or password manager can substitute.
+
+This repo uses **one shared key for both jobs**: `~/.ssh/id_agenix`.
+- It's on GitHub → fetch works.
+- It's the recipient in `secrets.nix` → decrypt works on every machine that has
+  the file.
+
+That's why a new machine is just "drop the key, build." Because the *same* key
+is a recipient everywhere, you **never edit `secrets.nix` or re-encrypt** when
+adding a machine.
+
+> [!NOTE]
+> **Bootstrap chicken-and-egg:** one of the secrets *is* a GitHub SSH key
+> (`id_github`). You can't decrypt it until you've already pulled `nix-secrets`,
+> which needs a key. That's why you place the shared `id_agenix` by hand first —
+> it breaks the cycle. After the first build, agenix manages the rest.
+
+**Trade-off:** the shared-key model is simple but means one key decrypts
+everything. If you'd rather compartmentalize per machine, use per-host keys —
+but then every new machine requires adding its recipient to `secrets.nix` and
+**re-encrypting every secret** (`agenix -r`). This repo is set up for the shared
+model.
+
+The decrypt identity is configured in
+[`modules/darwin/secrets.nix`](modules/darwin/secrets.nix) (`age.identityPaths`).
+
+---
+
+## First-time setup (creating the shared key + secrets)
+
+Do this **once, ever** — the first time you stand up this config, before any new
+machine can use the shared-key flow.
+
+### 1. Create the shared agenix key (passphraseless)
+
+```sh
+ssh-keygen -t ed25519 -N "" -C "agenix" -f ~/.ssh/id_agenix
+chmod 600 ~/.ssh/id_agenix
+```
+
+Save **both** `id_agenix` and `id_agenix.pub` in 1Password ("agenix shared
+key"). Add the public key to GitHub: `gh ssh-key add ~/.ssh/id_agenix.pub`.
+
+### 2. Create the private `nix-secrets` repo
+
+A private GitHub repo named `nix-secrets` with a `secrets.nix` at its root:
+
+```nix
+let
+  shared = "ssh-ed25519 AAAA...   agenix";   # contents of id_agenix.pub
+in {
+  "github-ssh-key.age".publicKeys     = [ shared ];
+  "github-signing-key.age".publicKeys = [ shared ];
+}
+```
+
+> agenix takes the SSH public key line **directly** as a recipient — no
+> `age1...` conversion needed.
+
+### 3. Create each secret
+
+Encrypt your real key material to the `.age` files. The `EDITOR="cp <file>"`
+trick fills the temp file from an existing plaintext file, then agenix encrypts
+it:
+
+```sh
+cd ~/Developer/nix-secrets
+
+# GitHub SSH key (delivered to ~/.ssh/id_github on hosts)
+EDITOR="cp $HOME/.ssh/id_github" \
+  nix run github:ryantm/agenix -- -i ~/.ssh/id_agenix -e github-ssh-key.age
+
+# GPG signing key — export it first (passphraseless), then encrypt
+nix shell nixpkgs#gnupg -c gpg --batch --passphrase '' \
+  --quick-generate-key "Your Name <you@example.com>" ed25519 sign 0
+nix shell nixpkgs#gnupg -c gpg --export-secret-keys --armor you@example.com > /tmp/pgp_github.key
+EDITOR="cp /tmp/pgp_github.key" \
+  nix run github:ryantm/agenix -- -i ~/.ssh/id_agenix -e github-signing-key.age
+rm /tmp/pgp_github.key
+```
+
+Also upload the GPG **public** key at github.com/settings/keys → GPG keys
+(no title field; identity comes from the key). The email in the key must be a
+**verified** email on your GitHub account.
+
+```sh
+nix shell nixpkgs#gnupg -c gpg --export --armor you@example.com   # paste into GitHub
+```
+
+### 4. Commit, push, point the flake at it
+
+```sh
+cd ~/Developer/nix-secrets && git add -A && git commit -m "init secrets" && git push
+cd ~/Developer/nixos-config
+nix flake update secrets    # re-lock to the new nix-secrets commit
 nix run .#build-switch
 ```
-> [!CAUTION]
-> `~/.zshrc` will be replaced with the [`zsh` configuration](https://github.com/dustinlyons/nixos-config/blob/main/templates/starter/modules/shared/home-manager.nix#L8) from this repository. Make sure this is what you want.
-
-## For NixOS
-This configuration supports both `x86_64` and `aarch64` platforms.
-
-### 1. Burn and use the latest ISO
-Download and burn [the minimal ISO image](https://nixos.org/download.html) to a USB, or create a new VM with the ISO as base. Boot the installer.
-> If you're building a VM on an Apple Silicon Mac, choose [64-bit ARM](https://channels.nixos.org/nixos-23.05/latest-nixos-minimal-aarch64-linux.iso).
-
-**Quick Links**
-
-* [64-bit Intel/AMD](https://channels.nixos.org/nixos-23.05/latest-nixos-minimal-x86_64-linux.iso)
-* [64-bit ARM](https://channels.nixos.org/nixos-23.05/latest-nixos-minimal-aarch64-linux.iso)
-
-### 2. Optional: Setup secrets
-If you are using the starter with secrets, there are a few additional steps.
-
-#### 2a. Create a private Github repo to hold your secrets
-In Github, create a private [`nix-secrets`](https://github.com/dustinlyons/nix-secrets-example) repository with at least one file (like a `README`). You'll enter this name during installation.
-
-#### 2b. Install keys
-Before generating your first build, these keys must exist in your `~/.ssh` directory. Don't worry, I provide a few commands to help you.
-
-| Key Name            | Platform         | Description                                                                              |
-|---------------------|------------------|------------------------------------------------------------------------------------------|
-| id_ed25519          | macOS / NixOS    | Github key with access to `nix-secrets`. Not copied to host, used only during bootstrap. |
-| id_ed25519_agenix   | macOS / NixOS    | Primary key for encrypting and decrypting secrets. Copied over to host as `id_ed25519`.  |
-
-Run one of these commands:
-
-##### Copy keys from USB drive
-This command auto-detects a USB drive connected to the current system.
-> Keys must be named `id_ed25519` and `id_ed25519_agenix`.
-```sh
-sudo nix run --extra-experimental-features 'nix-command flakes' github:dustinlyons/nixos-config#copy-keys
-```
-
-##### Create new keys
-```sh
-sudo nix run --extra-experimental-features 'nix-command flakes' github:dustinlyons/nixos-config#create-keys
-```
-
-##### Check existing keys
-If you're rolling your own, just check they are installed correctly.
-```sh
-sudo nix run --extra-experimental-features 'nix-command flakes' github:dustinlyons/nixos-config#check-keys
-```
-
-### 3. Install configuration
-#### Pick your template
-
-> [!IMPORTANT]
-> For Nvidia cards, select the second option, `nomodeset`, when booting the installer, or you will see a blank screen.
-
-> [!CAUTION]
-> Running this will reformat your drive to the `ext4` filesystem.
-
-**Simple**
-* Great for beginners, enables you to get started quickly and test out Nix.
-* Forgoing secrets means you must configure apps that depend on keys or passwords yourself.
-* You can always add secrets later.
-```sh
-sudo nix run --extra-experimental-features 'nix-command flakes' github:dustinlyons/nixos-config#install
-```
-
-**With secrets**
-* Choose this to add more moving parts for a 100% declarative configuration.
-* This template offers you a place to keep passwords, private keys, etc. *as part of your configuration*.
-```sh
-sudo nix run --extra-experimental-features 'nix-command flakes' github:dustinlyons/nixos-config#install-with-secrets
-```
-
-### 4. Set user password
-On first boot at the login screen:
-- Use shortcut `Ctrl-Alt-F2` (or `Fn-Ctrl-Option-F2` if on a Mac) to move to a terminal session
-- Login as `root` using the password created during installation
-- Set the user password with `passwd <user>`
-- Go back to the login screen: `Ctrl-Alt-F7`
-- **Review the essential hotkeys** in [NixOS README](modules/nixos/README.md#essential-hotkeys) to get started with the bspwm window manager
-
-## How to create secrets
-To create a new secret `secret.age`, first [create a `secrets.nix` file](https://github.com/ryantm/agenix#tutorial) at the root of your [`nix-secrets`](https://github.com/dustinlyons/nix-secrets-example) repository. Use this code:
 
 > [!NOTE]
-> `secrets.nix` is interpreted by the imperative `agenix` commands to pick the "right" keys for your secrets.
->
-> Think of this file as the config file for `agenix`. It's not part of your system configuration.
+> If you're *re-keying* and an `.age` file already exists but can no longer be
+> decrypted (e.g. lost passphrase), **delete the file first** (`rm
+> github-ssh-key.age`) so agenix creates it fresh instead of trying to decrypt
+> the old one.
 
-**secrets.nix**
-```nix
-let
-  user1 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL0idNvgGiucWgup/mP78zyC23uFjYq0evcWdjGQUaBH";
-  users = [ user1 ];
+---
 
-  system1 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPJDyIr/FSz1cJdcoW69R+NrWzwGK/+3gJpqD1t8L2zE";
-  systems = [ system1 ];
-in
-{
-  "secret.age".publicKeys = [ user1 system1 ];
-}
-```
-Values for `user1` should be your public key, or if you prefer to have keys attached to hosts, use the `system1` declaration.
+## Daily use
 
-Now that we've configured `agenix` with our `secrets.nix`, it's time to create our first secret.
-
-Run the command below.
-
-```
-EDITOR=vim nix run github:ryantm/agenix -- -e secret.age
-```
-
-This opens an editor to accept, encrypt, and write your secret to disk.
-
-The command will look up the public key for `secret.age`, defined in your `secrets.nix`, and check for its private key in `~/.ssh/.`
-
-> To override the SSH path, provide the `-i` flag with a path to your `id_ed25519` key.
-
-Write your secret in the editor, save, and commit the file to your [`nix-secrets`](https://github.com/dustinlyons/nix-secrets-example) repo.
-
-Now we have two files: `secrets.nix` and our `secret.age`.
-
-Here's a more step-by-step example:
-
-## Secrets Example
-Let's say I wanted to create a new secret to hold my Github SSH key.
-
-I would `cd` into my [`nix-secrets`](https://github.com/dustinlyons/nix-secrets-example) repo directory, verify the `agenix` configuration (named `secrets.nix`) exists, then run
-```
-EDITOR=vim nix run github:ryantm/agenix -- -e github-ssh-key.age
-```
-
-This would start a `vim` session.
-
-I would enter insert mode `:i`, copy+paste the key, hit Esc and then type `:w` to save it, resulting in the creation of a new file, `github-ssh-key.age`.
-
-Then, I would edit `secrets.nix` to include a line specifying the public key to use for my new secret. I specify a user key, but I could just as easily specify a host key.
-
-**secrets.nix**
-```nix
-let
-  dustin = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL0idNvgGiucWgup/mP78zyC23uFjYq0evcWdjGQUaBH";
-  users = [ dustin ];
-  systems = [ ];
-in
-{
-  "github-ssh-key.age".publicKeys = [ dustin ];
-}
-```
-
-Finally, I'd commit all changes to the [`nix-secrets`](https://github.com/dustinlyons/nix-secrets-example) repository, go back to my `nixos-config` and run `nix flake update` to update the lock file.
-
-The secret is now ready to use. Here's an [example](https://github.com/dustinlyons/nixos-config/blob/3b95252bc6facd7f61c6c68ceb1935481cb6b457/nixos/secrets.nix#L28) from my configuration. In the end, this creates a symlink to a decrypted file in the Nix Store that reflects my original file.
-
-## Making changes
-With Nix, changes to your system are made by
-- editing your system configuration
-- building the [system closure](https://zero-to-nix.com/concepts/closures)
-- creating [a new generation](https://nixos.wiki/wiki/Terms_and_Definitions_in_Nix_Project#generation) based on this closure and switching to it
-
-This is all wrapped up in the `build-switch` run command.
-
-### Development workflow
-So, in general, the workflow for managing your environment will look like
-- make changes to the configuration
-- run `nix run .#build-switch`
-- watch Nix, `nix-darwin`, `home-manager`, etc do their thing
-- go about your way and benefit from a declarative environment
-
-### Trying packages
-For quickly trying a package without installing it, I usually run
 ```sh
-nix shell nixpkgs#hello
+nix run .#build          # build only, don't switch (dry check)
+nix run .#build-switch   # build and activate
+nix run .#rollback       # revert to the previous generation
+nix run .#clean          # garbage-collect old generations
+
+nix flake update         # update all inputs
+nix flake update secrets # update just the secrets input
+nix flake check          # validate the flake
 ```
 
-where `hello` is the package name from [nixpkgs](https://search.nixos.org/packages).
+After editing **any** `.nix` file: `nix run .#build-switch`.
+After adding **any new file**: `git add` it first — flakes ignore untracked
+files.
 
-## Compatibility and Feedback
-### Platforms
-This configuration has been tested and confirmed to work on the following platforms:
-- Newer M1/M2/M3 Apple Silicon Macs
-- Older x86_64 (Intel) Macs
-- Bare metal x86_64 PCs
-- NixOS VMs inside VMWare on macOS
-- macOS Sonoma VMs inside Parallels on macOS
+---
 
-### Feedback and Questions
-Have feedback or questions? Feel free to use the [discussion forum](https://github.com/dustinlyons/nixos-config/discussions).
+## Managing secrets
 
-### Contributing
-Interested in contributing to this project? Here's how you can help:
+Add a new secret:
 
-- **Code Contributions**: If you're interested in contributing code, please start by looking at open issues or feature requests. Fork the repository, make your changes, and submit a pull request. Make sure your code adheres to the existing style. For significant changes, consider opening an issue for discussion before starting work.
+1. In `nix-secrets/secrets.nix`, add `"thing.age".publicKeys = [ shared ];`.
+2. `EDITOR=vim nix run github:ryantm/agenix -- -e thing.age` (write, save).
+3. Reference it in `modules/darwin/secrets.nix` under `age.secrets`.
+4. Commit/push `nix-secrets`, then `nix flake update secrets && nix run .#build-switch`.
 
-- **Reporting Bugs**: If you encounter bugs or issues, please help by reporting them. Open a GitHub Issue and include as much detail as possible: what you were doing when the bug occurred, steps to reproduce the issue, and any relevant logs or error messages.
+Rotate / re-key all secrets to the recipients in `secrets.nix`:
 
-## Appendix
-### Why Nix Flakes
-**Reasons to jump into flakes and skip `nix-env`, Nix channels, etc**
-- Flakes work just like other package managers you already know: `npm`, `cargo`, `poetry`, `composer`, etc. Channels work more like traditional Linux distributions (like Ubuntu), which most devs don't know.
-- Flakes encapsulate not just project dependencies, but Nix expressions, Nix apps, and other configurations in a single file. It's all there in a single file. This is nice.
-- Channels lock all packages to one big global `nixpkgs` version. Flakes lock each individual package to a version, which is more precise and makes it much easier to manage overall.
-- Flakes have a growing ecosystem (see [Flake Hub](https://flakehub.com/) or [Dev Env](https://devenv.sh/)), so you're future-proofing yourself.
+```sh
+cd ~/Developer/nix-secrets
+nix run github:ryantm/agenix -- -r -i ~/.ssh/id_agenix
+```
 
-### NixOS Components
+---
 
-| Component                   | Description                                     |
-| --------------------------- | :---------------------------------------------  |
-| **Window Manager**          | Xorg + bspwm                                    |
-| **Terminal Emulator**       | alacritty                                       |
-| **Bar**                     | polybar                                         |
-| **Application Launcher**    | rofi                                            |
-| **Notification Daemon**     | dunst                                           |
-| **Display Manager**         | lightdm                                         |
-| **File Manager**            | thunar                                          |
-| **Text Editor**             | emacs daemon mode                               |
-| **Media Player**            | cider                                           |
-| **Image Viewer**            | feh                                             |
-| **Screenshot Software**     | flameshot                                       |
+## Repository layout
 
-### License
-This project is released under the [BSD-3-Clause license](https://github.com/dustinlyons/nixos-config/blob/main/LICENSE).
+```
+.
+├── setup.sh                 # one-command bootstrap for a fresh machine
+├── flake.nix                # inputs + machines map + darwinConfigurations
+├── apps/<arch>-darwin/      # build / build-switch / rollback / clean scripts
+├── hosts/darwin/            # macOS system configuration
+└── modules/
+    ├── shared/              # cross-machine: packages, home-manager, fonts
+    └── darwin/              # macOS: packages, casks, dock, secrets, home-manager
+```
 
-### Support
-If this project has been useful, consider supporting it.
+See [CLAUDE.md](CLAUDE.md) for a deeper map of the modules and conventions.
 
-<a href="https://www.buymeacoffee.com/dustinlyons1" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
+---
 
-I maintain this configuration in my spare time. I also build software for music and performing arts schools to manage scheduling, billing, and student records—if you know a teacher or studio owner, feel free to share [Conductly](https://conductly.com).
+## Troubleshooting
 
-### Stars
+**`experimental Nix feature 'nix-command' is disabled`**
+Flakes/`nix-command` aren't enabled. `setup.sh` passes the flag itself, but for
+manual `nix` commands either enable it permanently:
+```sh
+mkdir -p ~/.config/nix
+printf 'experimental-features = nix-command flakes\n' >> ~/.config/nix/nix.conf
+```
+or prefix each call — the flag goes **right after `nix`**:
+```sh
+nix --extra-experimental-features 'nix-command flakes' run .#build-switch
+```
 
-> "All we have to decide is what to do with the time that is given us." - J.R.R. Tolkien
+**`git@github.com: Permission denied (publickey)`** when fetching `secrets`
+The shared key isn't usable. Check, in order:
+```sh
+ls -l ~/.ssh/id_agenix                 # exists?
+chmod 600 ~/.ssh/id_agenix             # perms must be 600, or SSH ignores it
+ssh -T git@github.com                   # "Hi RATIU5!" = good
+```
+If still denied, the public key isn't on the GitHub account:
+`gh ssh-key add ~/.ssh/id_agenix.pub`.
 
-[![Star History Chart](https://api.star-history.com/svg?repos=dustinlyons/nixos-config&type=Date)](https://star-history.com/#dustinlyons/nixos-config&Date)
+**`age: error: no identity matched any of the recipients`**
+agenix tried to decrypt an existing `.age` file with a key that isn't one of its
+recipients. Either supply the right identity (`-i ~/.ssh/id_agenix`), or if the
+old file is unrecoverable, `rm` it and re-create the secret fresh.
+
+**SSH key asks for a passphrase / agenix can't decrypt unattended**
+The agenix key must be **passphraseless**. Generate a new one with
+`ssh-keygen -t ed25519 -N "" ...`, add it as a recipient, re-key, and update
+`age.identityPaths`.
+
+**`No machine in flake.nix matches user '<you>'`**
+Add your user to the `machines` map in `flake.nix`, `git add flake.nix`, and
+re-run — or `MACHINE=<label> ./setup.sh`.
+
+**`error: Path 'overlays' does not exist in Git repository`**
+Stale reference to a removed overlays loader. This config no longer uses
+`overlays/`; make sure `modules/shared/default.nix` doesn't read that path.
+
+**`error: Unexpected files in /etc, aborting activation`** /
+**`Build user group has mismatching GID`**
+macOS/Nix install edge cases. Follow the linked guidance in the
+[Determinate Systems Sequoia notes](https://determinate.systems/posts/nix-support-for-macos-sequoia/);
+for the `/etc` case, move the named files aside (append `.before-nix-darwin`)
+and re-run.
+</content>
+</invoke>
