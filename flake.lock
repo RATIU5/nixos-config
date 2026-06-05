@@ -250,11 +250,11 @@
     "secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1780609995,
-        "narHash": "sha256-rWV4SrY9c9eL1BXnBt7ZtNHM6DXfcY+YdceXiXBqGr4=",
+        "lastModified": 1780672898,
+        "narHash": "sha256-3lKjX7NrTr2MJ5GzDC8NamV8vqnDL8CSBZV5iFV0ZfI=",
         "ref": "refs/heads/main",
-        "rev": "39b519e6600b4cbb8edf83e599dbfc7e4ee0e74b",
-        "revCount": 2,
+        "rev": "420c14ea43ab6846799a658de477b48b7d6315c2",
+        "revCount": 3,
         "type": "git",
         "url": "ssh://git@github.com/RATIU5/nix-secrets.git"
       },

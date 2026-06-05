@@ -1,9 +1,7 @@
 { config, pkgs, agenix, secrets, user, ... }:
 {
   age = {
-    identityPaths = [
-      "/Users/${user}/.ssh/id_ed25519"
-    ];
+    identityPaths = [ "/Users/${user}/.ssh/id_agenix" ];
 
     secrets = {
       "github-ssh-key" = {
