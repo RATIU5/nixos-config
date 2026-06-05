@@ -105,6 +105,14 @@ for f in /etc/bashrc /etc/zshrc /etc/zprofile /etc/bash.bashrc /etc/nix/nix.conf
   fi
 done
 
+# nix-homebrew (mutableTaps = false) wants to own this dir; move a pre-existing
+# one aside so it can manage taps itself.
+TAPS="/opt/homebrew/Library/Taps"
+if [ -e "$TAPS" ] && [ ! -L "$TAPS" ] && [ ! -e "$TAPS.before-nix-darwin" ]; then
+  info "Backing up $TAPS -> $TAPS.before-nix-darwin"
+  sudo mv "$TAPS" "$TAPS.before-nix-darwin"
+fi
+
 # 7. Build and switch ------------------------------------------------------
 BUILD_ARGS=""
 [ "$NO_SECRETS" -eq 1 ] && BUILD_ARGS="--no-secrets"
