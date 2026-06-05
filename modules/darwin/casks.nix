@@ -18,6 +18,7 @@ _:
   "screaming-frog-seo-spider"
 
   # Productivity
+  "homerow" # Keyboard-driven UI navigation
   "raycast"
   "setapp"
 

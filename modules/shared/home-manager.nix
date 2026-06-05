@@ -381,22 +381,19 @@
         "/Users/${user}/.ssh/config_external"
       )
     ];
-    matchBlocks = {
+    # Per-host config. Attribute names are Host patterns; values use OpenSSH
+    # directive names (capitalized). Replaces the deprecated `matchBlocks`.
+    settings = {
       "*" = {
-        # Set the default values we want to keep
-        sendEnv = [ "LANG" "LC_*" ];
-        hashKnownHosts = true;
+        SendEnv = [ "LANG" "LC_*" ];
+        HashKnownHosts = true;
       };
       #"github.com" = {
-      #  identitiesOnly = true;
-      #  identityFile = [
-      #    (lib.mkIf pkgs.stdenv.hostPlatform.isLinux
-      #      "/home/${user}/.ssh/id_github"
-      #    )
-      #    (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin
-      #      "/Users/${user}/.ssh/id_github"
-      #    )
-      #  ];
+      #  IdentitiesOnly = true;
+      #  IdentityFile =
+      #    if pkgs.stdenv.hostPlatform.isDarwin
+      #    then "/Users/${user}/.ssh/id_github"
+      #    else "/home/${user}/.ssh/id_github";
       #};
     };
   };

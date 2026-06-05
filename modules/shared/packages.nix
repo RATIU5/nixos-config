@@ -11,10 +11,12 @@ with pkgs; [
   act # Run GitHub Actions locally
   aspell # Spell checker
   aspellDicts.en # English dictionary for aspell
+  atuin # Shell history with sync/search
   bat # Cat clone with syntax highlighting
   biome # Web toolchain (formatter/linter)
   btop # System monitor and process viewer
   coreutils # Basic file/text/shell utilities
+  delta # Syntax-highlighting pager for git diffs
   difftastic # Structural diff tool
   direnv # Per-directory environment variables (wired via programs.direnv)
   dust # Disk usage analyzer
