@@ -8,15 +8,13 @@
 # Override the auto-detected config label:
 #   MACHINE=personal ./setup.sh
 #
-# Skip agenix/secrets entirely (first-boot testing before nix-secrets is wired):
-#   ./setup.sh --no-secrets
-#
+# Requires the shared agenix key at ~/.ssh/id_agenix BEFORE running (drop it
+# from 1Password — see the README). Secrets are mandatory; the build won't
+# proceed without it.
 set -euo pipefail
 
-NO_SECRETS=0
 for a in "$@"; do
   case "$a" in
-    --no-secrets) NO_SECRETS=1 ;;
     *) printf "Unknown argument: %s\n" "$a" >&2; exit 1 ;;
   esac
 done
@@ -51,32 +49,26 @@ command -v nix >/dev/null 2>&1 || die "nix not on PATH — open a new terminal a
 ok "Nix available"
 
 # 3. SSH identity (agenix decrypts with ~/.ssh/id_agenix) ------------------
+# This is the shared key. It must already be in place — drop it from 1Password
+# before running. We refuse to generate one: a fresh key can't decrypt the
+# existing secrets, so an auto-generated key would only cause a confusing build
+# failure later.
 KEY="$HOME/.ssh/id_agenix"
 if [ ! -f "$KEY" ]; then
-  info "Generating SSH key at $KEY ..."
-  mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
-  ssh-keygen -t ed25519 -N "" -f "$KEY"
+  die "Missing $KEY. Drop the shared agenix key (private + .pub) from 1Password into ~/.ssh first — see the README, then re-run."
 fi
-ok "SSH key present"
+ok "Shared agenix key present"
 
-# 4. Show what must be registered before secrets can decrypt ---------------
-if [ "$NO_SECRETS" -eq 1 ]; then
-  info "Skipping secrets setup (--no-secrets); building the agenix-free variant."
+# 4. Sanity-check that the key can reach GitHub for the private nix-secrets input
+echo
+info "Checking GitHub access for the shared key (needed to pull nix-secrets)..."
+if ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new -T git@github.com 2>&1 | grep -qi "successfully authenticated"; then
+  ok "GitHub recognises the key"
 else
-  AGE_RECIPIENT="$($NIX run nixpkgs#ssh-to-age -- < "$KEY.pub" 2>/dev/null || true)"
-  echo
-  info "Before building, register this machine:"
-  echo "  1) Add the SSH PUBLIC key to GitHub (to pull the private nix-secrets input):"
+  info "Could not confirm GitHub auth for $KEY. If the build fails to fetch"
+  info "nix-secrets, add the public key to GitHub as an Authentication key:"
   echo "       $(cat "$KEY.pub")"
-  if [ -n "$AGE_RECIPIENT" ]; then
-    echo "  2) Add this age recipient to nix-secrets/secrets.nix and re-encrypt:"
-    echo "       $AGE_RECIPIENT"
-  else
-    echo "  2) Add this machine's age recipient to nix-secrets/secrets.nix:"
-    echo "       run:  nix run nixpkgs#ssh-to-age < $KEY.pub"
-  fi
-  echo
-  pause "Press Enter once both are done (or Ctrl-C to stop)... "
+  pause "Press Enter to continue anyway (or Ctrl-C to stop)... "
 fi
 
 # 5. Resolve the config label (same logic as the build scripts) ------------
@@ -84,13 +76,13 @@ ME="$(whoami)"
 if [ -z "${MACHINE:-}" ]; then
   # `|| true` so a no-match (empty result) doesn't trip `set -e` silently.
   MACHINE="$($NIX eval --raw .#machines \
-    --apply 'ms: let m = builtins.filter (n: ms.${n}.user == "'"$ME"'") (builtins.attrNames ms); in if m == [] then "" else builtins.head m' 2>/dev/null || true)"
+    --apply 'ms: let m = builtins.filter (n: ms.${n} == "'"$ME"'") (builtins.attrNames ms); in if m == [] then "" else builtins.head m' 2>/dev/null || true)"
 fi
 if [ -z "$MACHINE" ]; then
-  printf "${RED}No machine in flake.nix matches user '%s'.${NC}\n" "$ME" >&2
-  printf "${YELLOW}Add an entry to the machines map in flake.nix, e.g.:${NC}\n" >&2
-  printf "    %s = { system = \"aarch64-darwin\"; user = \"%s\"; };\n" "$ME" "$ME" >&2
-  printf "${YELLOW}then commit it (git add flake.nix) and re-run. Or override: MACHINE=<label> ./setup.sh${NC}\n" >&2
+  printf "${RED}No machine in config.nix matches user '%s'.${NC}\n" "$ME" >&2
+  printf "${YELLOW}Add an entry to the machines map in config.nix, e.g.:${NC}\n" >&2
+  printf "    %s = \"%s\";\n" "$ME" "$ME" >&2
+  printf "${YELLOW}then commit it (git add config.nix) and re-run. Or override: MACHINE=<label> ./setup.sh${NC}\n" >&2
   exit 1
 fi
 ok "Using config label: $MACHINE"
@@ -114,9 +106,7 @@ if [ -e "$TAPS" ] && [ ! -L "$TAPS" ] && [ ! -e "$TAPS.before-nix-darwin" ]; the
 fi
 
 # 7. Build and switch ------------------------------------------------------
-BUILD_ARGS=""
-[ "$NO_SECRETS" -eq 1 ] && BUILD_ARGS="--no-secrets"
-info "Running build-switch ${BUILD_ARGS}..."
-MACHINE="$MACHINE" $NIX run .#build-switch -- $BUILD_ARGS
+info "Running build-switch..."
+MACHINE="$MACHINE" $NIX run .#build-switch
 
 ok "Done. Open a new terminal to pick up the new environment."

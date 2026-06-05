@@ -1,7 +1,5 @@
-{ config, pkgs, lib, user, ... }:
+{ config, pkgs, lib, user, fullName, email, ... }:
 
-let name = "John Memmott";
-    email = "jcmemmott20@outlook.com"; in
 {
 
   direnv = {
@@ -187,7 +185,7 @@ let name = "John Memmott";
       enable = true;
     };
     settings = {
-      user.name = name;
+      user.name = fullName;
       user.email = email;
       init.defaultBranch = "main";
       core = {

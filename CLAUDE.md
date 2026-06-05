@@ -50,7 +50,7 @@ statix check
   - `shared/` - Configurations shared across machines (packages, home-manager, fonts)
   - `darwin/` - macOS-specific packages, Homebrew integration, and dock
 - `overlays/` - Auto-loading Nix overlays (any .nix file here runs automatically)
-- `apps/{aarch64,x86_64}-darwin/` - Build and deployment scripts
+- `apps/aarch64-darwin/` - Build and deployment scripts (Apple Silicon only)
 
 ### Key Patterns
 

@@ -1,9 +1,8 @@
-{ agenix, config, pkgs, lib, user, enableSecrets ? true, ... }:
+{ agenix, config, pkgs, lib, user, ... }:
 {
   imports = [
     ../../modules/darwin/home-manager.nix
     ../../modules/shared
-  ] ++ lib.optionals enableSecrets [
     ../../modules/darwin/secrets.nix
     agenix.darwinModules.default
   ];
