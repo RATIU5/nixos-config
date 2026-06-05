@@ -15,7 +15,6 @@ _:
 
   # Design / SEO
   "affinity"
-  "screaming-frog-seo-spider"
 
   # Productivity
   "homerow" # Keyboard-driven UI navigation
