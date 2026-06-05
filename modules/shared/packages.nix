@@ -48,7 +48,7 @@ with pkgs; [
   bun # JavaScript runtime / package manager
   go # Go
   nodejs_24 # Node.js (includes npm)
-  odin # Odin language compiler
+  odin # Odin language compiler (pinned to stable nixpkgs via overlay — see modules/shared/default.nix)
 
   # Editors
   helix # Modal terminal editor
