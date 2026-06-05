@@ -95,7 +95,17 @@ if [ -z "$MACHINE" ]; then
 fi
 ok "Using config label: $MACHINE"
 
-# 6. Build and switch ------------------------------------------------------
+# 6. Move stock /etc files aside so nix-darwin can take them over ----------
+# On a fresh Mac these are Apple's defaults; nix-darwin refuses to overwrite
+# files it didn't create. Back them up once so the first activation succeeds.
+for f in /etc/bashrc /etc/zshrc /etc/zprofile /etc/bash.bashrc /etc/nix/nix.conf; do
+  if [ -e "$f" ] && [ ! -e "$f.before-nix-darwin" ]; then
+    info "Backing up $f -> $f.before-nix-darwin"
+    sudo mv "$f" "$f.before-nix-darwin"
+  fi
+done
+
+# 7. Build and switch ------------------------------------------------------
 BUILD_ARGS=""
 [ "$NO_SECRETS" -eq 1 ] && BUILD_ARGS="--no-secrets"
 info "Running build-switch ${BUILD_ARGS}..."
