@@ -120,6 +120,22 @@
         "type": "github"
       }
     },
+    "homebrew-bobrwm": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1772909484,
+        "narHash": "sha256-nyybsdGhqgQ3TYmNpu6+wbdTOcZDiPNlvs4ImfFw+Tg=",
+        "owner": "bobrwm",
+        "repo": "homebrew-tap",
+        "rev": "8c35c54c015db8ce2c535fe58743d4239d47914b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "bobrwm",
+        "repo": "homebrew-tap",
+        "type": "github"
+      }
+    },
     "homebrew-bundle": {
       "flake": false,
       "locked": {
@@ -255,6 +271,7 @@
         "agenix": "agenix",
         "darwin": "darwin_2",
         "home-manager": "home-manager_2",
+        "homebrew-bobrwm": "homebrew-bobrwm",
         "homebrew-bundle": "homebrew-bundle",
         "homebrew-cask": "homebrew-cask",
         "homebrew-core": "homebrew-core",

@@ -1,0 +1,76 @@
+// bobrwm config — place at ~/.config/bobrwm/config.zon
+// or pass via: bobrwm -c /path/to/config.zon
+.{
+    // Layout algorithm.
+    // .layout = .bsp,
+    // Or fullscreen-per-window tiling:
+    // .layout = .monocle,
+
+    // BSP split axis policy.
+    // .auto picks axis from target tile geometry (yabai-style).
+    // .horizontal always splits left/right, .vertical always splits top/bottom.
+    // .bsp_split = .auto,
+
+    // BSP insertion target policy.
+    // .split creates a new split, .stack adds to target leaf stack.
+    // .bsp_insert_mode = .split,
+    //
+    // BSP insertion point policy.
+    // .focused, .first, .last, .min_depth
+    // .bsp_insert_point = .focused,
+
+    // Default ratio for newly-created BSP splits (clamped to 0.1..0.9).
+    // .bsp_split_ratio = 0.5,
+
+    // Placement for newly tiled windows when splitting.
+    // .second = right/bottom, .first = left/top
+    // .new_window_split = .second,
+
+    // Gaps between windows (pixels). Omit or set to 0 for no gaps.
+    // .gaps = .{
+    //     .inner = 4,
+    //     .outer = .{ .left = 4, .right = 4, .top = 4, .bottom = 4 },
+    // },
+
+    .keybinds = .{
+        // alt+1..9 → focus workspace
+        .{ .key = "1", .mods = .{ .ctrl = true }, .action = .focus_workspace, .arg = 1 },
+        .{ .key = "2", .mods = .{ .ctrl = true }, .action = .focus_workspace, .arg = 2 },
+        .{ .key = "3", .mods = .{ .ctrl = true }, .action = .focus_workspace, .arg = 3 },
+        .{ .key = "4", .mods = .{ .ctrl = true }, .action = .focus_workspace, .arg = 4 },
+        .{ .key = "5", .mods = .{ .ctrl = true }, .action = .focus_workspace, .arg = 5 },
+        .{ .key = "6", .mods = .{ .ctrl = true }, .action = .focus_workspace, .arg = 6 },
+        .{ .key = "7", .mods = .{ .ctrl = true }, .action = .focus_workspace, .arg = 7 },
+        .{ .key = "8", .mods = .{ .ctrl = true }, .action = .focus_workspace, .arg = 8 },
+        .{ .key = "9", .mods = .{ .ctrl = true }, .action = .focus_workspace, .arg = 9 },
+
+        // alt+shift+1..9 → move window to workspace
+        .{ .key = "1", .mods = .{ .ctrl = true, .shift = true }, .action = .move_to_workspace, .arg = 1 },
+        .{ .key = "2", .mods = .{ .ctrl = true, .shift = true }, .action = .move_to_workspace, .arg = 2 },
+        .{ .key = "3", .mods = .{ .ctrl = true, .shift = true }, .action = .move_to_workspace, .arg = 3 },
+        .{ .key = "4", .mods = .{ .ctrl = true, .shift = true }, .action = .move_to_workspace, .arg = 4 },
+        .{ .key = "5", .mods = .{ .ctrl = true, .shift = true }, .action = .move_to_workspace, .arg = 5 },
+        .{ .key = "6", .mods = .{ .ctrl = true, .shift = true }, .action = .move_to_workspace, .arg = 6 },
+        .{ .key = "7", .mods = .{ .ctrl = true, .shift = true }, .action = .move_to_workspace, .arg = 7 },
+        .{ .key = "8", .mods = .{ .ctrl = true, .shift = true }, .action = .move_to_workspace, .arg = 8 },
+        .{ .key = "9", .mods = .{ .ctrl = true, .shift = true }, .action = .move_to_workspace, .arg = 9 },
+
+        // alt+hjkl → focus direction
+        .{ .key = "h", .mods = .{ .ctrl = true }, .action = .focus_left },
+        .{ .key = "j", .mods = .{ .ctrl = true }, .action = .focus_down },
+        .{ .key = "k", .mods = .{ .ctrl = true }, .action = .focus_up },
+        .{ .key = "l", .mods = .{ .ctrl = true }, .action = .focus_right },
+
+        // alt+return → toggle split direction
+        .{ .key = "return", .mods = .{ .ctrl = true }, .action = .toggle_split },
+
+        // ctrl+f → toggle floating window
+        .{ .key = "f", .mods = .{ .ctrl = true }, .action = .toggle_float },
+        .{ .key = "f", .mods = .{ .ctrl = true, .shift = true }, .action = .toggle_keep_above },
+    },
+
+    .workspace_assignments = .{
+        // .{ .app_id = "com.apple.Safari", .workspace = 2 },
+        // .{ .app_id = "com.apple.MobileSMS", .workspace = 3 },
+    },
+}

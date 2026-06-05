@@ -26,12 +26,18 @@
       url = "github:homebrew/homebrew-cask";
       flake = false;
     };
+    # Third-party tap for bobrwm (HEAD-only Zig tiling WM). `bobrwm/tap` ->
+    # github.com/bobrwm/homebrew-tap by Homebrew convention.
+    homebrew-bobrwm = {
+      url = "github:bobrwm/homebrew-tap";
+      flake = false;
+    };
     secrets = {
       url = "git+ssh://git@github.com/RATIU5/nix-secrets.git";
       flake = false;
     };
   };
-  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, home-manager, nixpkgs, nixpkgs-odin, agenix, secrets } @inputs:
+  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, homebrew-bobrwm, home-manager, nixpkgs, nixpkgs-odin, agenix, secrets } @inputs:
     let
       # All personal settings (name, email, machines) live in config.nix —
       # edit that one file to make this repo yours.
@@ -86,6 +92,7 @@
                       "homebrew/homebrew-core" = homebrew-core;
                       "homebrew/homebrew-cask" = homebrew-cask;
                       "homebrew/homebrew-bundle" = homebrew-bundle;
+                      "bobrwm/tap" = homebrew-bobrwm;
                     };
                     mutableTaps = false;
                     autoMigrate = true;

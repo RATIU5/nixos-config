@@ -21,6 +21,11 @@
     #
     enable = true;
     casks  = pkgs.callPackage ./casks.nix {};
+    brews = [
+      # bobrwm: HEAD-only Zig tiling WM from the bobrwm/tap tap (registered in
+      # nix-homebrew.taps). Builds from source on install; pulls zig as a dep.
+      { name = "bobrwm/tap/bobrwm"; args = [ "HEAD" ]; }
+    ];
     #masApps = {
     #  "hidden-bar"   = 1452453066;
     #  "wireguard"    = 1451685025;
@@ -38,6 +43,14 @@
           file."Pictures/Screenshots/.keep".text = "";
           stateVersion = "23.11";
         };
+        # Auto-link every entry in dotfiles/config/ -> ~/.config/<entry>. Drop a
+        # file or folder under dotfiles/config/ and `git add` it — no per-file
+        # wiring needed. Copied into the Nix store (Option B: reproducible; edit
+        # then `nix run .#build-switch`). recursive = true links files one-by-one
+        # so apps can still write sibling state into the directory.
+        xdg.configFile = builtins.mapAttrs
+          (name: _: { source = ../../dotfiles/config + "/${name}"; recursive = true; })
+          (builtins.readDir ../../dotfiles/config);
         programs = {} // import ../shared/home-manager.nix { inherit config pkgs lib user fullName email; };
         manual.manpages.enable = false;
       };

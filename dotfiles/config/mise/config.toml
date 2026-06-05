@@ -1,0 +1,25 @@
+# Edit/remove entries to taste. After editing, `chezmoi apply` triggers `mise install`.
+# Browse available tools: `mise registry` or https://mise.jdx.dev/registry.html
+
+[tools]
+# Shared — installed on every machine.
+node      = "lts"
+go        = "latest"
+ripgrep   = "latest"
+fd        = "latest"
+bat       = "latest"
+jq        = "latest"
+delta     = "latest"
+python    = "3.12"
+
+[env]
+EDITOR = "helix"
+
+[settings]
+# experimental = true
+
+[tasks]
+# `mise run <name>` — see https://mise.jdx.dev/tasks/
+
+# [tasks.hello]
+# run = "echo hello"
