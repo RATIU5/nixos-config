@@ -388,13 +388,19 @@
         SendEnv = [ "LANG" "LC_*" ];
         HashKnownHosts = true;
       };
-      #"github.com" = {
-      #  IdentitiesOnly = true;
-      #  IdentityFile =
-      #    if pkgs.stdenv.hostPlatform.isDarwin
-      #    then "/Users/${user}/.ssh/id_github"
-      #    else "/home/${user}/.ssh/id_github";
-      #};
+      # Offer the shared agenix key for github.com so nix can fetch the private
+      # nix-secrets flake input. Plain ssh (used by nix's git fetcher) won't pick
+      # id_agenix up otherwise. setup.sh writes an equivalent block during the
+      # first bootstrap (before home-manager runs); this is the managed version
+      # that takes over on activation.
+      "github.com" = {
+        User = "git";
+        IdentitiesOnly = true;
+        IdentityFile =
+          if pkgs.stdenv.hostPlatform.isDarwin
+          then "/Users/${user}/.ssh/id_agenix"
+          else "/home/${user}/.ssh/id_agenix";
+      };
     };
   };
 

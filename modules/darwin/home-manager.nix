@@ -34,6 +34,10 @@
 
   home-manager = {
     useGlobalPkgs = true;
+    # On a fresh machine, pre-existing dotfiles (the bootstrap ~/.ssh/config from
+    # setup.sh, stock shell rc files, etc.) would otherwise make activation abort
+    # with "would be clobbered". Back them up instead so the first switch succeeds.
+    backupFileExtension = "hm-backup";
     users.${user} = { pkgs, config, lib, ... }:
       {
         home = {
