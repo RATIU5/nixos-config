@@ -20,10 +20,13 @@
       experimental-features = nix-command flakes
     '';
   };
-  # Load configuration that is shared across systems
+  # System profile only carries things that must be system-wide. The shared
+  # package set is installed per-user via home.packages (modules/darwin/
+  # home-manager.nix) — importing it here too would install every package
+  # (and GUI app like Zed) twice, so Raycast/Spotlight show duplicate apps.
   environment.systemPackages = with pkgs; [
     agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
-  ] ++ (import ../../modules/shared/packages.nix { inherit pkgs; });
+  ];
 
   # Application firewall on (allows established/signed; blocks unsolicited incoming).
   networking.applicationFirewall = {
