@@ -221,6 +221,18 @@
         alias bwstart='launchctl kickstart -k "gui/$(id -u)/bobrwm"' # (re)start now
         alias bwstop='launchctl bootout "gui/$(id -u)/bobrwm"'       # stop until next login/start
         alias bwstatus='launchctl print "gui/$(id -u)/bobrwm" | head -20'
+
+        # Guard: never start a second bobrwm by hand — launchd owns its lifecycle.
+        # Typing `bobrwm` routes through launchctl instead of spawning a duplicate.
+        # (Bypass with the absolute path /opt/homebrew/bin/bobrwm if ever needed.)
+        bobrwm() {
+          if pgrep -x bobrwm >/dev/null 2>&1; then
+            echo "bobrwm already running (launchd-managed). Use: bwstart / bwstop / bwstatus / bwlog" >&2
+            return 1
+          fi
+          echo "bobrwm is launchd-managed — starting via launchctl..." >&2
+          launchctl kickstart -k "gui/$(id -u)/bobrwm"
+        }
       ''}
 
       # Screenshot function with path selection
