@@ -198,6 +198,13 @@
     activationScripts.postActivation.text = ''
       echo "setting wallpaper..." >&2
       sudo -u ${user} osascript -e 'tell application "System Events" to tell every desktop to set picture to "${../../assets/wallpaper/mitsuri-kanroji-3840x2160-22627.PNG}"'
+
+      # Rebind symbolic hotkeys immediately. `defaults write` (done above via
+      # CustomUserPreferences) does NOT take effect on its own — activateSettings
+      # reads com.apple.symbolichotkeys and re-binds everything live, so the
+      # Spotlight ⌘Space disable applies without a logout.
+      echo "applying symbolic hotkeys..." >&2
+      sudo -u ${user} /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u || true
     '';
   };
 }
