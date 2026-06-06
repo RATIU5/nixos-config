@@ -148,9 +148,18 @@
       CustomUserPreferences = {
         "com.apple.symbolichotkeys" = {
           AppleSymbolicHotKeys = {
-            # Spotlight
-            "64"  = { enabled = false; };  # Show Spotlight search
-            "65"  = { enabled = false; };  # Show Finder search window
+            # Spotlight. Must include the full `value` (the key combo) or macOS
+            # drops the entry and the disable is ignored. 64 = ⌘Space,
+            # 65 = ⌥⌘Space. Takes effect after a logout/login (the symbolic-
+            # hotkeys table is loaded at login).
+            "64" = {
+              enabled = false;
+              value = { parameters = [ 32 49 1048576 ]; type = "standard"; };
+            };  # Show Spotlight search (⌘Space)
+            "65" = {
+              enabled = false;
+              value = { parameters = [ 32 49 1572864 ]; type = "standard"; };
+            };  # Show Finder search window (⌥⌘Space)
             # Screenshots
             "28"  = { enabled = false; };  # Save screen to file
             "29"  = { enabled = false; };  # Copy screen to clipboard
