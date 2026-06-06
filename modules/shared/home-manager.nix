@@ -22,6 +22,8 @@
     enable = true;
     autocd = false;
     cdpath = [ "~/.local/share/src" ];
+    # Migrated from dotfiles/config/shell/sources.sh (Homebrew zsh-autosuggestions).
+    autosuggestion.enable = true;
     plugins = [
       {
           name = "zsh-autocomplete";
@@ -29,6 +31,47 @@
           file = "share/zsh-autocomplete/zsh-autocomplete.plugin.zsh";
       }
     ];
+    # Migrated from dotfiles/config/shell/aliases.sh. Simple 1:1 aliases live
+    # here; functions and conditional aliases stay in initContent below.
+    shellAliases = {
+      # git
+      gcm = "git commit -m";
+      gaa = "git add -A";
+      gco = "git checkout";
+      gpl = "git pull origin";
+      gps = "git push";
+      gst = "git status";
+      gsh = "git stash";
+      gsa = "git stash apply";
+      gbr = "git branch";
+      gpo = "git push origin";
+      gdf = "git diff";
+      gfe = "git fetch --prune";
+      grs = "git reset --soft HEAD~1";   # undo the last commit
+      "grs!" = "git reset --hard HEAD~1"; # remove the last commit
+      gcn = "git clone";
+      # directories
+      ".." = "cd ..";
+      "..." = "cd ../..";
+      "...." = "cd ../../..";
+      dev = "cd ~/Developer";
+      doc = "cd ~/Documents";
+      des = "cd ~/Desktop";
+      dow = "cd ~/Downloads";
+      home = "cd ~";
+      # tools
+      find = "fd";
+      cat = "bat --paging=never";
+      lst = "eza --tree";
+      fzf = ''fzf --preview "bat --color=always --style=numbers --line-range=:500 {}"'';
+      fzb = ''fzf --preview "bat --color=always --style=numbers --line-range=:500 {}"'';
+      neofetch = "macchina";
+      fetch = "macchina";
+      helix = "hx";
+      # ripgrep + syntax-aware diff (kept from prior Nix config)
+      search = ''rg -p --glob "!node_modules/*" --glob "!vendor/*" "$@"'';
+      diff = "difft";
+    };
     initContent = lib.mkBefore ''
       if [[ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]]; then
         . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
@@ -53,6 +96,19 @@
 
       export TERM=xterm-256color
 
+      # Environment (migrated from dotfiles/config/shell/env.sh)
+      export EFFECT_REPO="$HOME/.local/share/effect-solutions/effect"
+      export PAGER=less
+      export XDG_DATA_HOME="$HOME/.local/share"
+      export XDG_BIN_HOME="$HOME/.local/bin"
+      export XDG_CACHE_HOME="$HOME/.cache"
+      export STARSHIP_CONFIG="$XDG_CONFIG_HOME/starship/starship.toml"
+      export STARSHIP_CACHE="$XDG_CACHE_HOME/.starship/cache"
+
+      # Helix is my editor
+      export EDITOR="hx"
+      export VISUAL="hx"
+
       # Define PATH variables
       export PATH=$HOME/.pnpm-packages/bin:$HOME/.pnpm-packages:$PATH
       export PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
@@ -62,21 +118,31 @@
       export PATH=$HOME/.local/share/src/conductly/utils:$PATH
       export PYTHONPATH="$HOME/.local-pip/packages:$PYTHONPATH"
 
+      # PATH (migrated from dotfiles/config/shell/paths.sh)
+      export PATH="$HOME/.cargo/bin:/opt/homebrew/bin:$PATH"
+      export PATH="$HOME/.opencode/bin:$PATH"
+      export PATH="$HOME/.local/bin:$PATH"
+
       # Remove history data we don't want to see
       export HISTIGNORE="pwd:ls:cd"
 
-      # Ripgrep alias
-      alias search='rg -p --glob "!node_modules/*" --glob "!vendor/*" "$@"'
-
-      # Helix is my editor
-      export EDITOR="hx"
-      export VISUAL="hx"
-
-      # Use difftastic, syntax-aware diffing
-      alias diff=difft
-
       # Always color ls and group directories
       alias ls='ls --color=auto'
+
+      # mise runtime manager (migrated from sources.sh; no-op if not installed)
+      if command -v mise >/dev/null 2>&1; then
+        eval "$(mise activate zsh)"
+      fi
+
+      # git helper functions (migrated from aliases.sh)
+      gfcs() { git log --pretty=custom --decorate --date=short -S"$1"; }   # find commits by source
+      gfcm() { git log --pretty=custom --decorate --date=short --grep="$1"; }  # find commits by message
+      glrb() { git ls-remote --heads "''${1:-origin}"; }                   # list remote branches
+
+      # Use zoxide's `z` for cd in interactive shells (migrated from aliases.sh)
+      if [[ -o interactive ]]; then
+        alias cd='z'
+      fi
 
       # SSH wrapper functions with terminal color changes
       ssh-production() {
