@@ -32,6 +32,8 @@ with pkgs; [
   jq # JSON processor
   killall # Kill processes by name
   lazygit # Terminal UI for git
+  macchina # Fast system info fetch (neofetch/fetch aliases)
+  mise # Polyglot runtime/version manager (activated in home-manager.nix initContent)
   mkcert # Local HTTPS certificates
   ngrok # Secure tunneling service
   openssh # SSH client and server
