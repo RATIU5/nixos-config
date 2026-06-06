@@ -1,6 +1,3 @@
-# Shared shell environment. Sourced from your shell rc.
-
-export PATH="$HOME/.cargo/bin:/opt/homebrew/bin/:$PATH"
 export EFFECT_REPO=$HOME"/.local/share/effect-solutions/effect"
 export PAGER=less
 export XDG_DATA_HOME=$HOME"/.local/share"

@@ -1,8 +1,3 @@
-# Shared shell aliases. Sourced from your shell rc.
-
-# alias ll='ls -lah'
-# alias g='git'
-
 alias gcm='git commit -m'
 alias gaa='git add -A'
 alias gco='git checkout'
