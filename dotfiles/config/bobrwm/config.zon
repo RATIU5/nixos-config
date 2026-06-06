@@ -66,7 +66,6 @@
 
         // ctrl+f → toggle floating window
         .{ .key = "f", .mods = .{ .ctrl = true }, .action = .toggle_float },
-        .{ .key = "f", .mods = .{ .ctrl = true, .shift = true }, .action = .toggle_keep_above },
     },
 
     .workspace_assignments = .{
