@@ -11,7 +11,7 @@ _:
   # Utilities
   "1password"
   "figma"
-  "tailscale"
+  "tailscale-app"
 
   # Design / SEO
   "affinity"
