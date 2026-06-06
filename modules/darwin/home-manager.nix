@@ -8,6 +8,21 @@
     shell    = pkgs.zsh;
   };
 
+  # Autostart bobrwm (tiling WM) at login via a per-user LaunchAgent.
+  # bobrwm is a Homebrew brew -> /opt/homebrew/bin/bobrwm and runs in the
+  # foreground, so launchd supervises it directly: RunAtLoad starts it at login,
+  # KeepAlive restarts it if it exits/crashes. stdout+stderr go to one log file
+  # (see the `bwlog` zsh helper in modules/shared/home-manager.nix).
+  launchd.user.agents.bobrwm = {
+    serviceConfig = {
+      ProgramArguments = [ "/opt/homebrew/bin/bobrwm" ];
+      RunAtLoad = true;
+      KeepAlive = true;
+      StandardOutPath = "/Users/${user}/Library/Logs/bobrwm.log";
+      StandardErrorPath = "/Users/${user}/Library/Logs/bobrwm.log";
+    };
+  };
+
   homebrew = {
     # This is a module from nix-darwin
     # Homebrew is *installed* via the flake input nix-homebrew
