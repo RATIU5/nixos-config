@@ -168,11 +168,27 @@
             "82"  = { enabled = false; };  # Move right a space (variant)
           };
         };
+        # Desktop widgets (macOS Sonoma+). Hide them everywhere.
+        "com.apple.WindowManager" = {
+          StandardHideWidgets = 1;      # hide widgets on the desktop
+          StageManagerHideWidgets = 1;  # hide widgets while in Stage Manager
+        };
+        # iPhone-mirrored widgets shown on the Mac desktop.
+        "com.apple.chronod" = {
+          remoteWidgetsEnabled = 0;
+        };
       };
     };
     keyboard = {
       enableKeyMapping = true;
       remapCapsLockToControl = true;
     };
+    # Set the desktop wallpaper from the repo-stored image (copied into the Nix
+    # store). Runs in the logged-in user's GUI session so System Events can talk
+    # to the WindowServer; applies to every currently-connected desktop/space.
+    activationScripts.postActivation.text = ''
+      echo "setting wallpaper..." >&2
+      sudo -u ${user} osascript -e 'tell application "System Events" to tell every desktop to set picture to "${../../assets/wallpaper/mitsuri-kanroji-3840x2160-22627.PNG}"'
+    '';
   };
 }
