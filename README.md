@@ -272,6 +272,28 @@ Run it:
 
 It installs the Xcode CLT and Nix if needed, then builds and switches.
 
+### Grant your terminal Full Disk Access (required)
+
+A few macOS system defaults this config sets live in SIP-protected preference
+domains — most notably `com.apple.universalaccess` (reduce motion/transparency).
+`defaults` can only write those if the terminal you run `build-switch` from has
+**Full Disk Access**. Without it, activation fails partway with:
+
+```
+Could not write domain com.apple.universalaccess; exiting
+```
+
+and aborts *before* the Homebrew step, so **casks never get installed**.
+
+1. System Settings → Privacy & Security → **Full Disk Access**
+2. Add and enable your terminal app (this config ships **Ghostty**; add Terminal/iTerm too if you bootstrap from them)
+3. **Fully quit and reopen** the terminal — toggling the switch isn't enough, the process must restart to pick up the grant
+4. Re-run `nix run .#build-switch`
+
+This is a one-time, per-terminal-app grant. It can't be declared in Nix because
+macOS gates these permissions through the TCC database, which requires explicit
+user approval.
+
 ## Updating
 
 ```sh

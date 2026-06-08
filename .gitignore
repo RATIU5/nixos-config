@@ -5,3 +5,6 @@ result
 .claude
 modules/nixos/scripts/__pycache__/
 tests/garage-analyzer/__pycache__/
+# gh writes auth state here (token lives in the macOS keychain); must stay
+# unmanaged/writable so `gh auth login` doesn't hit a read-only store symlink.
+dotfiles/config/gh/hosts.yml
