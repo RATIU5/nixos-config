@@ -77,10 +77,10 @@
       apps = forAllSystems mkDarwinApps;
       darwinConfigurations =
         let
-          mkDarwin = user:
+          mkDarwin = profile: user:
             darwin.lib.darwinSystem {
               inherit system;
-              specialArgs = inputs // { inherit user fullName email; };
+              specialArgs = inputs // { inherit user profile fullName email; };
               modules = [
                 home-manager.darwinModules.home-manager
                 nix-homebrew.darwinModules.nix-homebrew
@@ -102,6 +102,6 @@
               ];
             };
         in
-        nixpkgs.lib.mapAttrs (_: user: mkDarwin user) machines;
+        nixpkgs.lib.mapAttrs (profile: user: mkDarwin profile user) machines;
     };
 }

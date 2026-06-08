@@ -1,4 +1,4 @@
-{ config, pkgs, lib, home-manager, user, fullName, email, ... }:
+{ config, pkgs, lib, home-manager, user, profile, fullName, email, ... }:
 
 {
   users.users.${user} = {
@@ -24,7 +24,7 @@
     # $ mas search <app name>
     #
     enable = true;
-    casks  = pkgs.callPackage ./casks.nix {};
+    casks  = pkgs.callPackage ./casks.nix { inherit profile; };
     brews = [
       # bobrwm: HEAD-only Zig tiling WM from the bobrwm/tap tap (registered in
       # nix-homebrew.taps). Builds from source on install; pulls zig as a dep.
