@@ -3,8 +3,33 @@ theme = "catppuccin_opaque"
 [editor]
 line-number = 'relative'
 mouse = false
+bufferline = "multiple"           # show open buffers as a tab line
+color-modes = true                # tint the mode indicator
+rulers = [100]
+trim-trailing-whitespace = true
+completion-replace = true
+end-of-line-diagnostics = "hint"
 
 [editor.cursor-shape]
 insert = "bar"
 normal = "block"
 select = "underline"
+
+[editor.soft-wrap]
+enable = true
+
+[editor.indent-guides]
+render = true
+character = "┊"
+skip-levels = 1
+
+[editor.inline-diagnostics]
+cursor-line = "warning"
+other-lines = "error"
+
+[editor.statusline]
+left = ["mode", "spinner", "file-name", "file-modification-indicator"]
+right = ["diagnostics", "selections", "position", "file-encoding", "file-line-ending", "file-type"]
+
+[editor.lsp]
+display-inlay-hints = true

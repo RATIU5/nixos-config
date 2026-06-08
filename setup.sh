@@ -27,6 +27,10 @@ pause() { printf "${YELLOW}%s${NC}" "$1"; read -r _; }
 
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$REPO_DIR"
+
+# 0. Hardware guard — Apple Silicon macOS only --------------------------------
+[ "$(uname -s)" = "Darwin" ] || die "This config is macOS only (got $(uname -s))."
+[ "$(uname -m)" = "arm64" ]  || die "This config supports Apple Silicon (arm64) Macs only; got $(uname -m)."
 NIX="nix --extra-experimental-features nix-command --extra-experimental-features flakes"
 
 # 1. Xcode Command Line Tools (provides git) -------------------------------
@@ -130,5 +134,31 @@ fi
 # 7. Build and switch ------------------------------------------------------
 info "Running build-switch..."
 MACHINE="$MACHINE" $NIX run .#build-switch
+
+# 8. Odin language server (ols) -------------------------------------------------
+# nixpkgs' ols build is broken against current Odin, so we build it from source
+# against the odin installed by build-switch (versions match). Idempotent and
+# non-fatal: a failure here doesn't abort the bootstrap.
+# Make sure the freshly-installed odin is reachable in this shell.
+export PATH="/run/current-system/sw/bin:/opt/homebrew/bin:$HOME/.nix-profile/bin:$HOME/.local/bin:$PATH"
+OLS_DIR="$HOME/.local/share/ols"
+if ! command -v odin >/dev/null 2>&1; then
+  info "odin not on PATH in this shell — skipping ols build. Open a new terminal and re-run ./setup.sh, or build ols manually (see modules/shared/packages.nix)."
+elif [ -x "$HOME/.local/bin/ols" ]; then
+  ok "ols already installed"
+else
+  info "Building Odin language server (ols) from source..."
+  if [ ! -d "$OLS_DIR/.git" ]; then
+    git clone --depth 1 https://github.com/DanielGavin/ols "$OLS_DIR"
+  fi
+  if ( cd "$OLS_DIR" && ./build.sh && ./odinfmt.sh ); then
+    mkdir -p "$HOME/.local/bin"
+    ln -sf "$OLS_DIR/ols" "$HOME/.local/bin/ols"
+    ln -sf "$OLS_DIR/odinfmt" "$HOME/.local/bin/odinfmt"
+    ok "ols + odinfmt installed to ~/.local/bin"
+  else
+    info "ols build failed — build it manually later (see modules/shared/packages.nix note)."
+  fi
+fi
 
 ok "Done. Open a new terminal to pick up the new environment."

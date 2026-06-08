@@ -18,6 +18,34 @@
     enableZshIntegration = true;
   };
 
+  # Fuzzy finder + completion engine. enableZshIntegration wires CTRL-T (files),
+  # CTRL-R (history), and ALT-C (cd), plus fuzzy tab-completion for cd/kill/ssh.
+  fzf = {
+    enable = true;
+    enableZshIntegration = true;
+    defaultCommand = "fd --type f --hidden --follow --exclude .git";
+    defaultOptions = [ "--height 40%" "--layout=reverse" "--border" ];
+    fileWidgetCommand = "fd --type f --hidden --follow --exclude .git";
+    changeDirWidgetCommand = "fd --type d --hidden --follow --exclude .git";
+    fileWidgetOptions = [
+      ''--preview "bat --color=always --style=numbers --line-range=:500 {}"''
+    ];
+  };
+
+  # SQLite-backed shell history with full-text CTRL-R search, scoped by
+  # directory/exit-code/duration. Local-only by default (no sync).
+  atuin = {
+    enable = true;
+    enableZshIntegration = true;
+    flags = [ "--disable-up-arrow" ]; # keep up-arrow as plain prefix history
+    settings = {
+      style = "compact";
+      inline_height = 25;
+      show_preview = true;
+      enter_accept = false;
+    };
+  };
+
   zsh = {
     enable = true;
     autocd = false;
@@ -109,6 +137,11 @@
       export EDITOR="hx"
       export VISUAL="hx"
 
+      # Odin LSP (ols) is built manually from source (nixpkgs build is broken
+      # against our Odin). It needs its builtin/ folder pointed to explicitly
+      # since the binary is symlinked onto PATH. See modules/shared/packages.nix.
+      export OLS_BUILTIN_FOLDER="$HOME/.local/share/ols/builtin"
+
       # Define PATH variables
       export PATH=$HOME/.pnpm-packages/bin:$HOME/.pnpm-packages:$PATH
       export PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
@@ -126,13 +159,27 @@
       # Remove history data we don't want to see
       export HISTIGNORE="pwd:ls:cd"
 
-      # Always color ls and group directories
-      alias ls='ls --color=auto'
+      # eza as a modern ls: icons, git status column, directories first
+      alias ls='eza --icons --group-directories-first'
+      alias ll='eza --icons --group-directories-first --long --git --header'
+      alias la='eza --icons --group-directories-first --long --git --header --all'
+      alias lt='eza --icons --tree --level=2'
 
       # mise runtime manager (migrated from sources.sh; no-op if not installed)
       if command -v mise >/dev/null 2>&1; then
         eval "$(mise activate zsh)"
       fi
+
+      # lazydocker against the podman machine. Resolve DOCKER_HOST on demand so
+      # we don't pay `podman machine inspect` on every shell startup.
+      lazydocker() {
+        if [ -z "$DOCKER_HOST" ] && command -v podman >/dev/null 2>&1; then
+          local sock
+          sock="$(podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}' 2>/dev/null)"
+          [ -n "$sock" ] && export DOCKER_HOST="unix://$sock"
+        fi
+        command lazydocker "$@"
+      }
 
       # git helper functions (migrated from aliases.sh)
       gfcs() { git log --pretty=custom --decorate --date=short -S"$1"; }   # find commits by source
@@ -241,6 +288,11 @@
           spectacle -r -b -o "$project_path/$filename"
           echo "Screenshot saved to: $project_path/$filename"
       }
+
+      # Auto-start tmux on new interactive terminal if not already inside one
+      if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
+        exec tmux
+      fi
     '';
   };
 
@@ -553,6 +605,13 @@
       bind-key -T copy-mode-vi 'C-k' select-pane -U
       bind-key -T copy-mode-vi 'C-l' select-pane -R
       bind-key -T copy-mode-vi 'C-\' select-pane -l
+
+      # sesh session manager — prefix + s opens a fuzzy popup of sessions,
+      # zoxide dirs, and configured projects (replaces the default session list).
+      bind-key s display-popup -E -w 60% -h 50% "sesh connect \"$(
+        sesh list --icons | fzf --no-sort --ansi --prompt '⚡ ' \
+          --header 'sesh: switch session/project'
+      )\""
 
       # Darwin-specific fix for tmux 3.5a with sensible plugin
       # This MUST be at the very end of the config

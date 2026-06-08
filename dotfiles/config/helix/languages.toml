@@ -1,11 +1,173 @@
-[[language]]
-name = "go"
-formatter = { command = "gofmt" }
-auto-format = true
-language-servers = ["gopls", "golangci-lint-lsp"]
+# =============================================================================
+# Language servers
+# =============================================================================
+# Most languages (TS, HTML, CSS, JSON, YAML, Markdown, Rust, PHP, Lua, Bash,
+# Dockerfile, GraphQL, TOML, Odin) use Helix's built-in defaults and work as
+# soon as the binary is on PATH (installed via modules/shared/packages.nix).
+# The blocks below only override defaults or add secondary servers.
+
+[language-server.nixd]
+command = "nixd"
+
+[language-server.ruff]
+command = "ruff"
+args = ["server"]
+
+[language-server.pyright]
+command = "pyright-langserver"
+args = ["--stdio"]
+
+[language-server.tailwindcss]
+command = "tailwindcss-language-server"
+args = ["--stdio"]
+
+[language-server.emmet-ls]
+command = "emmet-ls"
+args = ["--stdio"]
+
+[language-server.sqls]
+command = "sqls"
+
+# Shopify Liquid (theme-check). Ships inside the Shopify CLI.
+[language-server.shopify-theme-ls]
+command = "shopify"
+args = ["theme", "language-server"]
 
 [language-server.golangci-lint-lsp]
 command = "golangci-lint-langserver"
 
 [language-server.golangci-lint-lsp.config]
 command = ["golangci-lint", "run", "--output.json.path", "stdout", "--show-stats=false", "--issues-exit-code=1"]
+
+# =============================================================================
+# Languages
+# =============================================================================
+
+# --- Go ----------------------------------------------------------------------
+[[language]]
+name = "go"
+formatter = { command = "gofmt" }
+auto-format = true
+language-servers = ["gopls", "golangci-lint-lsp"]
+
+# --- Nix ---------------------------------------------------------------------
+[[language]]
+name = "nix"
+language-servers = ["nixd"]
+formatter = { command = "nixpkgs-fmt" }
+auto-format = true
+
+# --- Python (astral.sh: ruff + pyright) --------------------------------------
+[[language]]
+name = "python"
+language-servers = ["ruff", "pyright"]
+formatter = { command = "ruff", args = ["format", "-"] }
+auto-format = true
+
+# --- Rust (toolchain per-project via `mise use rust@…`) ----------------------
+[[language]]
+name = "rust"
+auto-format = true
+
+# --- TypeScript / JavaScript / JSX / TSX (biome) -----------------------------
+[[language]]
+name = "typescript"
+formatter = { command = "biome", args = ["format", "--stdin-file-path", "f.ts"] }
+auto-format = true
+
+[[language]]
+name = "javascript"
+formatter = { command = "biome", args = ["format", "--stdin-file-path", "f.js"] }
+auto-format = true
+
+[[language]]
+name = "tsx"
+language-servers = ["typescript-language-server", "tailwindcss", "emmet-ls"]
+formatter = { command = "biome", args = ["format", "--stdin-file-path", "f.tsx"] }
+auto-format = true
+
+[[language]]
+name = "jsx"
+language-servers = ["typescript-language-server", "tailwindcss", "emmet-ls"]
+formatter = { command = "biome", args = ["format", "--stdin-file-path", "f.jsx"] }
+auto-format = true
+
+# --- JSON --------------------------------------------------------------------
+[[language]]
+name = "json"
+formatter = { command = "biome", args = ["format", "--stdin-file-path", "f.json"] }
+auto-format = true
+
+[[language]]
+name = "jsonc"
+formatter = { command = "biome", args = ["format", "--stdin-file-path", "f.jsonc"] }
+auto-format = true
+
+# --- CSS ---------------------------------------------------------------------
+[[language]]
+name = "css"
+language-servers = ["vscode-css-language-server", "tailwindcss"]
+formatter = { command = "biome", args = ["format", "--stdin-file-path", "f.css"] }
+auto-format = true
+
+# --- HTML --------------------------------------------------------------------
+[[language]]
+name = "html"
+language-servers = ["vscode-html-language-server", "tailwindcss", "emmet-ls"]
+
+# --- Astro -------------------------------------------------------------------
+[[language]]
+name = "astro"
+language-servers = ["astro-ls", "tailwindcss", "emmet-ls"]
+formatter = { command = "biome", args = ["format", "--stdin-file-path", "f.astro"] }
+auto-format = true
+
+# --- Svelte ------------------------------------------------------------------
+[[language]]
+name = "svelte"
+language-servers = ["svelteserver", "tailwindcss", "emmet-ls"]
+formatter = { command = "biome", args = ["format", "--stdin-file-path", "f.svelte"] }
+auto-format = true
+
+# --- GraphQL -----------------------------------------------------------------
+[[language]]
+name = "graphql"
+formatter = { command = "biome", args = ["format", "--stdin-file-path", "f.graphql"] }
+auto-format = true
+
+# --- Lua ---------------------------------------------------------------------
+[[language]]
+name = "lua"
+formatter = { command = "stylua", args = ["-"] }
+auto-format = true
+
+# --- Bash --------------------------------------------------------------------
+[[language]]
+name = "bash"
+formatter = { command = "shfmt", args = ["-i", "2"] }
+auto-format = true
+
+# --- SQL ---------------------------------------------------------------------
+[[language]]
+name = "sql"
+language-servers = ["sqls"]
+
+# --- Odin --------------------------------------------------------------------
+# LSP (ols) attaches via Helix's default odin config once `ols` is on PATH.
+# Build it manually: see modules/shared/packages.nix note. odinfmt is its
+# companion formatter, also built from the ols repo.
+[[language]]
+name = "odin"
+formatter = { command = "odinfmt", args = ["-stdin"] }
+auto-format = true
+
+# --- Shopify Liquid ----------------------------------------------------------
+# No tree-sitter grammar ships with Helix for Liquid, so highlighting is plain
+# until you add one. The LSP (theme-check) still attaches for diagnostics.
+[[language]]
+name = "liquid"
+scope = "source.liquid"
+file-types = ["liquid"]
+roots = [".theme-check.yml", ".theme-check.yaml", "shopify.theme.toml"]
+language-servers = ["shopify-theme-ls"]
+comment-token = "{# #}"

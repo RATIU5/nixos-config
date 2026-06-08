@@ -6,6 +6,14 @@
     ../../modules/darwin/secrets.nix
     agenix.darwinModules.default
   ];
+
+  # Apple Silicon only. Fail the build with a clear message rather than letting
+  # an x86_64 Mac or Linux host hit confusing downstream errors.
+  assertions = [{
+    assertion = pkgs.stdenv.hostPlatform.system == "aarch64-darwin";
+    message = "This configuration supports Apple Silicon (aarch64-darwin) only; got ${pkgs.stdenv.hostPlatform.system}.";
+  }];
+
   # Setup user, packages, programs
   nix = {
     enable = false;

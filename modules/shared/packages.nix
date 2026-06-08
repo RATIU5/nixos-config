@@ -48,6 +48,14 @@ with pkgs; [
   yazi # Terminal file manager
   # zoxide is installed via programs.zoxide in home-manager.nix
 
+  # Workflow / dev TUIs
+  sesh # tmux session manager (fzf + zoxide-aware project jumper)
+  lazydocker # Container TUI (works with podman via DOCKER_HOST)
+  ast-grep # Structural code search/refactor (`sg`)
+  sd # Intuitive find/replace (sed without the line-noise)
+  watchexec # Run a command on file change
+  xh # Fast HTTP client (httpie-like)
+
   # Language toolchains
   bun # JavaScript runtime / package manager
   go # Go
@@ -61,4 +69,47 @@ with pkgs; [
   # Dev environments / containers
   devenv # Reproducible per-project dev shells
   podman # Daemonless container engine
+
+  # Language servers & formatters (for Helix). Language *runtimes* (node, go,
+  # python, rust, …) are managed per-project by mise; these are the editor
+  # tooling that Helix auto-wires once the binaries are on PATH.
+  # -- LSPs --
+  typescript-language-server # JS / TS / JSX / TSX
+  astro-language-server # Astro
+  svelte-language-server # Svelte
+  vscode-langservers-extracted # HTML / CSS / JSON / ESLint
+  emmet-ls # Emmet expansion in markup
+  tailwindcss-language-server # Tailwind class IntelliSense
+  yaml-language-server # YAML
+  marksman # Markdown
+  taplo # TOML (LSP + formatter)
+  graphql-language-service-cli # GraphQL
+  dockerfile-language-server # Dockerfile
+  bash-language-server # Bash
+  lua-language-server # Lua
+  sqls # SQL
+  ruff # Python: LSP (`ruff server`) + linter + formatter
+  pyright # Python: type checking
+  rust-analyzer # Rust LSP (toolchain itself via `mise use rust@…`)
+  phpactor # PHP
+  nixd # Nix (smarter than nil for flakes)
+  # ols (Odin LSP) omitted: nixpkgs build is broken against current Odin.
+  # Build from source against the Homebrew odin on PATH (versions match):
+  #   git clone https://github.com/DanielGavin/ols ~/.local/share/ols
+  #   cd ~/.local/share/ols && ./build.sh && ./odinfmt.sh
+  #   ln -sf ~/.local/share/ols/{ols,odinfmt} ~/.local/bin/
+  # OLS_BUILTIN_FOLDER is exported in home-manager.nix; odinfmt is wired as the
+  # Odin formatter in dotfiles/config/helix/languages.toml.
+  gopls # Go
+  golangci-lint-langserver # Go linting (referenced in languages.toml)
+  shopify-cli # Shopify Liquid: `shopify theme language-server`
+  # -- Formatters / linters --
+  oxlint # Fast JS/TS linter (oxc); LSP not yet in nixpkgs
+  stylua # Lua formatter
+  shfmt # Shell formatter
+  shellcheck # Shell linter
+  nixpkgs-fmt # Nix formatter
+  statix # Nix linter (also run in CI)
+  deadnix # Nix dead-code linter
+  # biome (JS/TS/JSON/CSS format+lint) already listed above
 ] ++ myFonts
