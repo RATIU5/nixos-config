@@ -267,16 +267,13 @@
 	    editor = "vim";
         autocrlf = "input";
       };
-<<<<<<< HEAD
       # Sign commits with the SSH key (id_agenix) instead of GPG: it's
       # passphraseless (no per-commit prompt) and needs no gpg-agent/pinentry.
       # Add id_agenix.pub to GitHub as a *Signing* key for the Verified badge
       # (setup.sh does this). See README "Commit signing".
-=======
       # Sign commits with SSH (not GPG) using the agenix identity key, which is
       # already present and used for GitHub auth (see ssh.settings."github.com").
       # ssh-keygen (bundled with macOS) is the signer; no gpg/pinentry needed.
->>>>>>> 9806832 (fix git, add docs, remove old references)
       commit.gpgsign = true;
       gpg.format = "ssh";
       user.signingKey = "/Users/${user}/.ssh/id_agenix.pub";
