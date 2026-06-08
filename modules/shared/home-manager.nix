@@ -267,7 +267,13 @@
 	    editor = "vim";
         autocrlf = "input";
       };
+      # Sign commits with the SSH key (id_agenix) instead of GPG: it's
+      # passphraseless (no per-commit prompt) and needs no gpg-agent/pinentry.
+      # Add id_agenix.pub to GitHub as a *Signing* key for the Verified badge
+      # (setup.sh does this). See README "Commit signing".
       commit.gpgsign = true;
+      gpg.format = "ssh";
+      user.signingKey = "/Users/${user}/.ssh/id_agenix.pub";
       pull.rebase = true;
       rebase.autoStash = true;
     };
@@ -380,67 +386,6 @@
       let g:airline_powerline_fonts = 1
       '';
      };
-
-  alacritty = {
-    enable = true;
-    settings = {
-      cursor = {
-        style = "Block";
-      };
-
-      window = {
-        opacity = 1.0;
-        padding = {
-          x = 24;
-          y = 24;
-        };
-      };
-
-      # Fix for shell path when launching from desktop
-      # When launching from desktop, $SHELL may point to /bin/zsh instead of
-      # the Nix-managed shell, causing environment issues
-      terminal.shell = {
-        program = "${pkgs.zsh}/bin/zsh";
-      };
-
-      font = {
-        normal = {
-          family = "MesloLGS NF";
-          style = "Regular";
-        };
-        size = 14;
-      };
-
-      colors = {
-        primary = {
-          background = "0x1f2528";
-          foreground = "0xc0c5ce";
-        };
-
-        normal = {
-          black = "0x1f2528";
-          red = "0xec5f67";
-          green = "0x99c794";
-          yellow = "0xfac863";
-          blue = "0x6699cc";
-          magenta = "0xc594c5";
-          cyan = "0x5fb3b3";
-          white = "0xc0c5ce";
-        };
-
-        bright = {
-          black = "0x65737e";
-          red = "0xec5f67";
-          green = "0x99c794";
-          yellow = "0xfac863";
-          blue = "0x6699cc";
-          magenta = "0xc594c5";
-          cyan = "0x5fb3b3";
-          white = "0xd8dee9";
-        };
-      };
-    };
-  };
 
   ssh = {
     enable = true;

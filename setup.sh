@@ -137,8 +137,9 @@ MACHINE="$MACHINE" $NIX run .#build-switch
 
 # 8. Odin language server (ols) -------------------------------------------------
 # nixpkgs' ols build is broken against current Odin, so we build it from source
-# against the odin installed by build-switch (versions match). Idempotent and
-# non-fatal: a failure here doesn't abort the bootstrap.
+# against the Homebrew odin installed by build-switch (both track the latest
+# release, so they stay in sync). Idempotent and non-fatal: a failure here
+# doesn't abort the bootstrap.
 # Make sure the freshly-installed odin is reachable in this shell.
 export PATH="/run/current-system/sw/bin:/opt/homebrew/bin:$HOME/.nix-profile/bin:$HOME/.local/bin:$PATH"
 OLS_DIR="$HOME/.local/share/ols"
@@ -159,6 +160,23 @@ else
   else
     info "ols build failed — build it manually later (see modules/shared/packages.nix note)."
   fi
+fi
+
+# 9. Register id_agenix as a GitHub SSH *signing* key (Verified commits) -------
+# Commits are signed with ~/.ssh/id_agenix (gpg.format=ssh, set in home-manager
+# git config). GitHub tracks auth and signing keys separately, so the same key
+# must be added a second time with type=signing to get the green Verified badge.
+# Best-effort and idempotent: needs an authenticated gh (installed by build-switch).
+echo
+if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
+  if gh ssh-key add "$HOME/.ssh/id_agenix.pub" --type signing --title "$(hostname -s)-signing" 2>/dev/null; then
+    ok "Registered id_agenix.pub as a GitHub signing key"
+  else
+    ok "GitHub signing key already present"
+  fi
+else
+  info "gh not authenticated — to get Verified commits, add the signing key once:"
+  info "  gh auth login && gh ssh-key add ~/.ssh/id_agenix.pub --type signing"
 fi
 
 ok "Done. Open a new terminal to pick up the new environment."

@@ -29,6 +29,10 @@
       # bobrwm: HEAD-only Zig tiling WM from the bobrwm/tap tap (registered in
       # nix-homebrew.taps). Builds from source on install; pulls zig as a dep.
       { name = "bobrwm/tap/bobrwm"; args = [ "HEAD" ]; }
+      # odin: latest-release bottle. The nixpkgs build breaks on the new Apple
+      # SDK; Homebrew tracks current odin and stays in sync with ols master
+      # (built from source in setup.sh). `brew upgrade odin` to update.
+      "odin"
     ];
     #masApps = {
     #  "hidden-bar"   = 1452453066;
@@ -49,6 +53,11 @@
           packages = pkgs.callPackage ./packages.nix {};
           # Ensure the screenshot target dir exists (system.defaults.screencapture.location).
           file."Pictures/Screenshots/.keep".text = "";
+          # Ghostty is a Homebrew cask, which only ships the `ghostty` binary
+          # inside the app bundle. Symlink it onto PATH (~/.local/bin is on PATH)
+          # so the CLI (`ghostty +list-themes`, etc.) works like the old nix build.
+          file.".local/bin/ghostty".source =
+            config.lib.file.mkOutOfStoreSymlink "/Applications/Ghostty.app/Contents/MacOS/ghostty";
           stateVersion = "23.11";
         };
         # Auto-link every entry in dotfiles/config/ -> ~/.config/<entry>. Drop a

@@ -1,13 +1,9 @@
-{ config, pkgs, nixpkgs-odin, sf-mono-liga-src, ... }:
+{ config, pkgs, sf-mono-liga-src, ... }:
 
 {
 
   nixpkgs = {
-    # Pull odin from pinned stable nixpkgs (unstable build is broken on the new SDK).
     overlays = [
-      (final: prev: {
-        odin = nixpkgs-odin.legacyPackages.${prev.stdenv.hostPlatform.system}.odin;
-      })
       # SFMono-Nerd-Font-Ligaturized: pre-patched .otf files, just copied in.
       (final: prev: {
         sf-mono-liga-bin = prev.stdenvNoCC.mkDerivation {

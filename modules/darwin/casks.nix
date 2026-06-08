@@ -6,6 +6,8 @@ lib.optionals (profile != "vm") ([
   "zen"
 
   # Dev tools
+  "ghostty" # GPU-accelerated terminal (cask so Spotlight/Launchpad index it)
+  "zed" # Code editor (cask so Spotlight/Launchpad/Raycast index it)
   "yaak" # OSS API client (Insomnia alternative)
 
   # Utilities

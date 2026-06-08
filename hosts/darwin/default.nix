@@ -31,7 +31,8 @@
   # System profile only carries things that must be system-wide. The shared
   # package set is installed per-user via home.packages (modules/darwin/
   # home-manager.nix) — importing it here too would install every package
-  # (and GUI app like Zed) twice, so Raycast/Spotlight show duplicate apps.
+  # twice. GUI apps (Ghostty, Zed) are Homebrew casks so launchers can find
+  # them (see modules/darwin/casks.nix).
   environment.systemPackages = with pkgs; [
     agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];

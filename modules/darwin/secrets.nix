@@ -13,13 +13,10 @@
         group = "staff";
       };
 
-      "github-signing-key" = {
-        symlink = false;
-        path = "/Users/${user}/.ssh/pgp_github.key";
-        file =  "${secrets}/github-signing-key.age";
-        mode = "600";
-        owner = "${user}";
-      };
+      # Commit signing uses the SSH key (id_agenix) via gpg.format=ssh — see the
+      # git config in modules/shared/home-manager.nix. The old GPG signing key
+      # (github-signing-key.age) is no longer needed; the .age file can be left
+      # in nix-secrets unused or deleted.
     };
   };
 }

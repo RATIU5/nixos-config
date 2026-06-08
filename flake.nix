@@ -2,9 +2,6 @@
   description = "macOS (nix-darwin) configuration";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    # Pinned stable nixpkgs used only for `odin` — the unstable build pulls
-    # LLVM18 compiler-rt that fails against apple-sdk-26.4 / libc++21.
-    nixpkgs-odin.url = "github:nixos/nixpkgs/nixos-25.05";
     home-manager.url = "github:nix-community/home-manager";
     agenix.url = "github:ryantm/agenix";
     darwin = {
@@ -42,7 +39,7 @@
       flake = false;
     };
   };
-  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, homebrew-bobrwm, home-manager, nixpkgs, nixpkgs-odin, agenix, secrets, sf-mono-liga-src } @inputs:
+  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, homebrew-bobrwm, home-manager, nixpkgs, agenix, secrets, sf-mono-liga-src } @inputs:
     let
       # All personal settings (name, email, machines) live in config.nix —
       # edit that one file to make this repo yours.

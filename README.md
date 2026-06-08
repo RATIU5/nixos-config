@@ -185,8 +185,8 @@ build." The key lives in 1Password.
 
 If you forked this, you need your own `nix-secrets` repo before the build will
 work. It's quick — a private repo with a `secrets.nix` recipient list and the
-two `.age` files this config expects (`github-ssh-key`, `github-signing-key` —
-see `modules/darwin/secrets.nix`; add or remove to taste).
+`.age` file this config expects (`github-ssh-key` — see
+`modules/darwin/secrets.nix`; add or remove to taste).
 
 ```sh
 # 1. Make the shared key (one time, ever) and save it in 1Password.
@@ -205,8 +205,7 @@ let
   shared = "ssh-ed25519 AAAA...";   # paste the contents of ~/.ssh/id_agenix.pub
 in
 {
-  "github-ssh-key.age".publicKeys     = [ shared ];
-  "github-signing-key.age".publicKeys = [ shared ];
+  "github-ssh-key.age".publicKeys = [ shared ];
 }
 ```
 
@@ -214,7 +213,6 @@ Encrypt each secret (opens an editor — paste the value, save, quit), commit, p
 
 ```sh
 EDITOR=vim nix run github:ryantm/agenix -- -e github-ssh-key.age
-EDITOR=vim nix run github:ryantm/agenix -- -e github-signing-key.age
 git add -A && git commit -m "init secrets" && git push
 ```
 
@@ -244,6 +242,18 @@ machine) — `ssh -T git@github.com` should greet you. If not:
 
 ```sh
 gh ssh-key add ~/.ssh/id_agenix.pub --title "$(hostname)"
+```
+
+### Commit signing
+
+Commits are signed with the same `id_agenix` key over SSH (`gpg.format = ssh` in
+the git config) — passphraseless, so it never prompts, and no GPG/gpg-agent to
+set up. For the green **Verified** badge, GitHub needs the key added a *second*
+time as a **Signing key** (auth and signing keys are tracked separately).
+`setup.sh` does this automatically when `gh` is authenticated; to do it by hand:
+
+```sh
+gh ssh-key add ~/.ssh/id_agenix.pub --type signing --title "$(hostname)-signing"
 ```
 
 Add this machine to the `machines` map in `config.nix` if your user isn't there,

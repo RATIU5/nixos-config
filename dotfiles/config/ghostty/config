@@ -16,7 +16,7 @@
 #
 # A future update will allow custom themes to be installed in certain
 # directories.
-theme = catppuccin-mocha
+theme = Catppuccin Mocha
 
 # Font size in points. This value can be a non-integer and the nearest integer
 # pixel size will be selected. If you have a high dpi display where 1pt = 2px

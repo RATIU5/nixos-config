@@ -60,11 +60,17 @@ with pkgs; [
   bun # JavaScript runtime / package manager
   go # Go
   nodejs_24 # Node.js (includes npm)
-  odin # Odin language compiler (pinned to stable nixpkgs via overlay — see modules/shared/default.nix)
+  # odin: installed via Homebrew (modules/darwin/home-manager.nix `brews`), not
+  # nixpkgs. The nixpkgs build breaks on the new Apple SDK, and pinning it to an
+  # old stable left it out of sync with current ols. Homebrew tracks the latest
+  # odin release (`brew upgrade odin`) and matches ols master.
 
   # Editors
   helix # Modal terminal editor
-  zed-editor # Zed editor
+  # zed: installed as a Homebrew cask (modules/darwin/casks.nix), not nixpkgs.
+  # home-manager symlinks .app bundles into "~/Applications/Home Manager Apps",
+  # which macOS Launch Services / Spotlight / Raycast won't index. The cask
+  # installs into /Applications so launchers find it, and it auto-updates.
 
   # Dev environments / containers
   devenv # Reproducible per-project dev shells
@@ -94,7 +100,7 @@ with pkgs; [
   phpactor # PHP
   nixd # Nix (smarter than nil for flakes)
   # ols (Odin LSP) omitted: nixpkgs build is broken against current Odin.
-  # Build from source against the Homebrew odin on PATH (versions match):
+  # Build from source against the Homebrew odin on PATH (both track latest):
   #   git clone https://github.com/DanielGavin/ols ~/.local/share/ols
   #   cd ~/.local/share/ols && ./build.sh && ./odinfmt.sh
   #   ln -sf ~/.local/share/ols/{ols,odinfmt} ~/.local/bin/
