@@ -1,6 +1,6 @@
 { lib, profile, ... }:
 
-[
+lib.optionals (profile != "vm") ([
   # Browsers (Safari is built-in)
   "arc"
   "zen"
@@ -32,4 +32,4 @@
 ]
 ++ lib.optionals (profile == "work") [
   "slack" # Work comms (work profile only)
-]
+])
