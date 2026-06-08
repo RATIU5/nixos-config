@@ -246,49 +246,6 @@
           esac
       }
 
-      # Tmux aliases for devenv sessions
-      alias atlas='tmux -S /run/user/1000/tmux-atlas attach -t atlas'
-      alias conductly='tmux -S /run/user/1000/tmux-conductly attach -t conductly'
-      alias river='tmux -S /run/user/1000/tmux-river attach -t river'
-
-      # macOS-style open command using Nautilus
-      ${lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
-        alias open="xdg-open"
-        alias rxp="/home/dustin/.local/share/src/restxp/restxp"
-
-        # Reboot to Windows partition (Linux only)
-        alias windows='sudo systemctl reboot --boot-loader-entry=auto-windows'
-      ''}
-
-      # Screenshot function with path selection
-      screenshot() {
-          local project_path
-          case "$1" in
-              conductly|c)
-                  project_path="/home/dustin/.local/share/src/conductly"
-                  ;;
-              *)
-                  echo "Usage: screenshot [conductly|c]"
-                  echo "  conductly (c) - Save to conductly project"
-                  return 1
-                  ;;
-          esac
-
-          # Prompt user for filename
-          echo -n "Enter screenshot filename (without .png extension): "
-          read -r user_filename
-
-          # Use user input or fallback to timestamp if empty
-          if [[ -n "$user_filename" ]]; then
-              local filename="$user_filename.png"
-          else
-              local filename="screenshot-$(date +'%Y%m%d-%H%M%S').png"
-          fi
-
-          spectacle -r -b -o "$project_path/$filename"
-          echo "Screenshot saved to: $project_path/$filename"
-      }
-
       # Auto-start tmux on new interactive terminal if not already inside one
       if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
         exec tmux
@@ -451,10 +408,7 @@
           family = "MesloLGS NF";
           style = "Regular";
         };
-        size = lib.mkMerge [
-          (lib.mkIf pkgs.stdenv.hostPlatform.isLinux 10)
-          (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin 14)
-        ];
+        size = 14;
       };
 
       colors = {
@@ -491,14 +445,7 @@
   ssh = {
     enable = true;
     enableDefaultConfig = false;
-    includes = [
-      (lib.mkIf pkgs.stdenv.hostPlatform.isLinux
-        "/home/${user}/.ssh/config_external"
-      )
-      (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin
-        "/Users/${user}/.ssh/config_external"
-      )
-    ];
+    includes = [ "/Users/${user}/.ssh/config_external" ];
     # Per-host config. Attribute names are Host patterns; values use OpenSSH
     # directive names (capitalized). Replaces the deprecated `matchBlocks`.
     settings = {
@@ -514,10 +461,7 @@
       "github.com" = {
         User = "git";
         IdentitiesOnly = true;
-        IdentityFile =
-          if pkgs.stdenv.hostPlatform.isDarwin
-          then "/Users/${user}/.ssh/id_agenix"
-          else "/home/${user}/.ssh/id_agenix";
+        IdentityFile = "/Users/${user}/.ssh/id_agenix";
       };
     };
   };
@@ -543,7 +487,7 @@
         # Use XDG data directory
         # https://github.com/tmux-plugins/tmux-resurrect/issues/348
         extraConfig = ''
-          set -g @resurrect-dir '/Users/dustin/.cache/tmux/resurrect'
+          set -g @resurrect-dir '${config.home.homeDirectory}/.cache/tmux/resurrect'
           set -g @resurrect-capture-pane-contents 'on'
           set -g @resurrect-pane-contents-area 'visible'
         '';
