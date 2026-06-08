@@ -198,6 +198,11 @@
         "com.apple.chronod" = {
           remoteWidgetsEnabled = 0;
         };
+        # AirDrop: only discoverable to people in Contacts (not "Everyone").
+        # Values: "Off" | "Contacts Only" | "Everyone".
+        "com.apple.sharingd" = {
+          DiscoverableMode = "Contacts Only";
+        };
       };
     };
     keyboard = {
