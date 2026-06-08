@@ -163,10 +163,15 @@ current Odin) — `setup.sh` builds it from source automatically.
 
 ## Making it yours
 
-Everything personal lives in **`config.nix`** — name, email, and the `machines`
-map (build label → macOS user). Edit that one file. The only thing that lives
-elsewhere is the private secrets repo URL, which Nix requires to be a literal in
-`flake.nix` (`inputs.secrets.url`) — point it at your own repo too.
+Everything personal lives in **`config.nix`** — name, email, `githubUser` (used
+to generate the `gh` CLI host file), and the `machines` map (build label → macOS
+user). Edit that one file.
+
+The **one** thing that can't live in `config.nix` is the private secrets repo
+URL. Nix evaluates the flake `inputs` block before any expression runs, so an
+input URL *must* be a string literal — it cannot read `config.nix`. Point
+`inputs.secrets.url` in `flake.nix` at your own repo (see the forking section
+below). Everything else is derived from `config.nix`.
 
 ## Secrets, briefly
 

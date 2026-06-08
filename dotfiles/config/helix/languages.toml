@@ -37,7 +37,14 @@ args = ["theme", "language-server"]
 command = "golangci-lint-langserver"
 
 [language-server.golangci-lint-lsp.config]
-command = ["golangci-lint", "run", "--output.json.path", "stdout", "--show-stats=false", "--issues-exit-code=1"]
+command = [
+  "golangci-lint",
+  "run",
+  "--output.json.path",
+  "stdout",
+  "--show-stats=false",
+  "--issues-exit-code=1",
+]
 
 # =============================================================================
 # Languages
@@ -64,7 +71,7 @@ language-servers = ["ruff", "pyright"]
 formatter = { command = "ruff", args = ["format", "-"] }
 auto-format = true
 
-# --- Rust (toolchain per-project via `mise use rust@…`) ----------------------
+# --- Rust (toolchain per-project via `mise use rust@...`) ----------------------
 [[language]]
 name = "rust"
 auto-format = true

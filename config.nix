@@ -7,8 +7,12 @@
   fullName = "John Memmott";
   email    = "me@ratiu5.dev";
 
+  # Your GitHub username — used to generate the `gh` CLI hosts file
+  # (dotfiles/config/gh/hosts.yml is auto-generated from this).
+  githubUser = "RATIU5";
+
   # Machines you build on (Apple Silicon only). The attribute name
-  # (work/personal/…) is the build label selected by `nix run .#build-switch`;
+  # (work/personal/...) is the build label selected by `nix run .#build-switch`;
   # the value is the real macOS account name (`whoami`). Add one entry per
   # machine/account you use.
   machines = {

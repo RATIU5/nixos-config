@@ -47,7 +47,7 @@
       # All personal settings (name, email, machines) live in config.nix —
       # edit that one file to make this repo yours.
       userConfig = import ./config.nix;
-      inherit (userConfig) machines fullName email;
+      inherit (userConfig) machines fullName email githubUser;
       # Apple Silicon only.
       system = "aarch64-darwin";
       forAllSystems = f: nixpkgs.lib.genAttrs [ system ] f;
@@ -85,7 +85,7 @@
           mkDarwin = profile: user:
             darwin.lib.darwinSystem {
               inherit system;
-              specialArgs = inputs // { inherit user profile fullName email; };
+              specialArgs = inputs // { inherit user profile fullName email githubUser; };
               modules = [
                 home-manager.darwinModules.home-manager
                 nix-homebrew.darwinModules.nix-homebrew

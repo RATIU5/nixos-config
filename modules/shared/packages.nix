@@ -71,7 +71,7 @@ with pkgs; [
   podman # Daemonless container engine
 
   # Language servers & formatters (for Helix). Language *runtimes* (node, go,
-  # python, rust, …) are managed per-project by mise; these are the editor
+  # python, rust, ...) are managed per-project by mise; these are the editor
   # tooling that Helix auto-wires once the binaries are on PATH.
   # -- LSPs --
   typescript-language-server # JS / TS / JSX / TSX
@@ -90,7 +90,7 @@ with pkgs; [
   sqls # SQL
   ruff # Python: LSP (`ruff server`) + linter + formatter
   pyright # Python: type checking
-  rust-analyzer # Rust LSP (toolchain itself via `mise use rust@…`)
+  rust-analyzer # Rust LSP (toolchain itself via `mise use rust@...`)
   phpactor # PHP
   nixd # Nix (smarter than nil for flakes)
   # ols (Odin LSP) omitted: nixpkgs build is broken against current Odin.

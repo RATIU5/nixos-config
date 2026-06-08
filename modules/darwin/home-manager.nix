@@ -1,4 +1,4 @@
-{ config, pkgs, lib, home-manager, user, profile, fullName, email, ... }:
+{ config, pkgs, lib, home-manager, user, profile, fullName, email, githubUser, ... }:
 
 {
   users.users.${user} = {
@@ -56,9 +56,20 @@
         # wiring needed. Copied into the Nix store (Option B: reproducible; edit
         # then `nix run .#build-switch`). recursive = true links files one-by-one
         # so apps can still write sibling state into the directory.
-        xdg.configFile = builtins.mapAttrs
+        xdg.configFile = (builtins.mapAttrs
           (name: _: { source = ../../dotfiles/config + "/${name}"; recursive = true; })
-          (builtins.readDir ../../dotfiles/config);
+          (builtins.readDir ../../dotfiles/config))
+        # gh CLI host file is generated from config.nix (githubUser) rather than
+        # checked in, so a fork doesn't ship someone else's username.
+        // {
+          "gh/hosts.yml".text = ''
+            github.com:
+                git_protocol: https
+                users:
+                    ${githubUser}:
+                user: ${githubUser}
+          '';
+        };
         programs = {} // import ../shared/home-manager.nix { inherit config pkgs lib user fullName email; };
         manual.manpages.enable = false;
       };
