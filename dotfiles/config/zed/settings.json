@@ -134,7 +134,7 @@
 	"helix_mode": true,
 	"tab_size": 2,
 	"ui_font_size": 16,
-	"buffer_font_family": "SF Mono",
+	"buffer_font_family": "Liga SFMono Nerd Font",
 	"buffer_font_size": 16.0,
 	"theme": {
 		"mode": "dark",

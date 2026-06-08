@@ -1,4 +1,4 @@
-{ config, pkgs, nixpkgs-odin, ... }:
+{ config, pkgs, nixpkgs-odin, sf-mono-liga-src, ... }:
 
 {
 
@@ -7,6 +7,19 @@
     overlays = [
       (final: prev: {
         odin = nixpkgs-odin.legacyPackages.${prev.stdenv.hostPlatform.system}.odin;
+      })
+      # SFMono-Nerd-Font-Ligaturized: pre-patched .otf files, just copied in.
+      (final: prev: {
+        sf-mono-liga-bin = prev.stdenvNoCC.mkDerivation {
+          pname = "sf-mono-liga-bin";
+          version = "dev";
+          src = sf-mono-liga-src;
+          dontConfigure = true;
+          installPhase = ''
+            mkdir -p $out/share/fonts/opentype
+            cp -R $src/*.otf $out/share/fonts/opentype/
+          '';
+        };
       })
     ];
     config = {

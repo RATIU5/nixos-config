@@ -8,4 +8,5 @@ with pkgs; [
   meslo-lgs-nf
   noto-fonts
   noto-fonts-color-emoji
+  sf-mono-liga-bin # SFMono + Nerd Font glyphs + FiraCode ligatures
 ]

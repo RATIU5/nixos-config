@@ -105,17 +105,17 @@ background-blur-radius = 40
 # Changing this configuration at runtime will only affect new terminals, i.e.
 # new windows, tabs, etc.
 # Default font
-font-family             = "JetBrainsMono Nerd Font Mono"
+font-family             = "Liga SFMono Nerd Font"
 font-style              = "Medium"
 # Bold
-font-family-bold        = "JetBrainsMono Nerd Font Mono"
-font-style-bold         = "ExtraBold"
+font-family-bold        = "Liga SFMono Nerd Font"
+font-style-bold         = "Bold"
 # Italic
-font-family-italic      = "JetBrainsMono Nerd Font Mono"
-font-style-italic       = "Italic"
+font-family-italic      = "Liga SFMono Nerd Font"
+font-style-italic       = "Medium Italic"
 # Bold and Italic
-font-family-bold-italic = "JetBrainsMono Nerd Font Mono"
-font-style-bold-italic  = "ExtraBold Italic"
+font-family-bold-italic = "Liga SFMono Nerd Font"
+font-style-bold-italic  = "Bold Italic"
 
 macos-option-as-alt = true
 

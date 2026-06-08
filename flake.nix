@@ -36,8 +36,13 @@
       url = "git+ssh://git@github.com/RATIU5/nix-secrets.git";
       flake = false;
     };
+    # SFMono patched with Nerd Font glyphs + FiraCode ligatures.
+    sf-mono-liga-src = {
+      url = "github:shaunsingh/SFMono-Nerd-Font-Ligaturized";
+      flake = false;
+    };
   };
-  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, homebrew-bobrwm, home-manager, nixpkgs, nixpkgs-odin, agenix, secrets } @inputs:
+  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, homebrew-bobrwm, home-manager, nixpkgs, nixpkgs-odin, agenix, secrets, sf-mono-liga-src } @inputs:
     let
       # All personal settings (name, email, machines) live in config.nix —
       # edit that one file to make this repo yours.
