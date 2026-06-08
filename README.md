@@ -1,4 +1,4 @@
-# nixos-config
+# RATIU5' macOS Nix Config
 
 A reproducible **Apple Silicon macOS** setup, declared with
 [nix-darwin](https://github.com/LnL7/nix-darwin) +
@@ -6,19 +6,18 @@ A reproducible **Apple Silicon macOS** setup, declared with
 fresh Mac or VM to a fully configured machine — packages, GUI apps, dock, shell,
 git, editor, and encrypted secrets via [agenix](https://github.com/ryantm/agenix).
 
-Everything that makes the machine *yours* — your name, email, and accounts —
+Everything that makes the machine _yours_ — your name, email, and accounts —
 lives in a single file: [`config.nix`](./config.nix). Fork it, edit that one
 file, point it at your secrets repo, run `./setup.sh`. Done.
 
 **Highlights**
 
-- 🍎 Apple Silicon only — enforced by a build-time assertion and a `setup.sh` guard
-- 📦 Declarative packages + Homebrew casks, deduplicated per-user via home-manager
-- 🐚 Batteries-included Zsh: starship, zoxide, fzf, atuin, eza, autosuggestions
-- ✏️ [Helix](https://helix-editor.com) wired for ~25 languages (LSPs + formatters), with
-  per-project runtimes via [mise](https://mise.jdx.dev)
-- 🔐 One passphraseless agenix key bootstraps every machine
-- 🎨 Catppuccin-themed Ghostty, Helix, Yazi, tmux, and starship (in `dotfiles/`)
+- **Apple Silicon only** — enforced by a build-time assertion and a `setup.sh` guard
+- **Declarative packages** + Homebrew casks, deduplicated per-user via home-manager
+- **Batteries-included Zsh**: starship, zoxide, fzf, atuin, eza, autosuggestions
+- **[Helix](https://helix-editor.com)** wired for ~25 languages (LSPs + formatters), with per-project runtimes via [mise](https://mise.jdx.dev)
+- **One passphraseless** agenix key bootstraps every machine
+- **Catppuccin-themed** Ghostty, Helix, Yazi, tmux, and starship (in `dotfiles/`)
 
 ## Layout
 
@@ -41,81 +40,83 @@ apps). The lists below are a snapshot — the `.nix` files are the source of tru
 <details>
 <summary><strong>CLI &amp; TUI tools</strong></summary>
 
-| Tool | Purpose |
-| --- | --- |
-| `act` | Run GitHub Actions locally |
-| `aspell` (+en) | Spell checker |
-| `atuin` | Shell history with search/sync |
-| `bat` | `cat` with syntax highlighting |
-| `biome` | JS/TS/JSON/CSS formatter + linter |
-| `btop` / `htop` | System / process monitors |
-| `coreutils` | GNU core utilities |
-| `delta` | Syntax-highlighting git pager |
-| `difftastic` | Structural diff |
-| `direnv` | Per-directory environments |
-| `dust` | Disk usage analyzer |
-| `eza` | Modern `ls` |
-| `fd` | Fast `find` |
-| `ffmpeg` | Multimedia framework |
-| `fzf` | Fuzzy finder |
-| `gh` | GitHub CLI |
-| `gitleaks` | Secret scanner |
-| `glow` | Terminal markdown renderer |
-| `iftop` | Network bandwidth monitor |
-| `jq` | JSON processor |
-| `lazygit` | Git TUI |
-| `lazydocker` | Container TUI (podman) |
-| `macchina` | System info fetch |
-| `mise` | Per-project runtime manager |
-| `mkcert` | Local HTTPS certs |
-| `ngrok` | Secure tunnels |
-| `pandoc` | Document converter |
-| `ripgrep` | Fast text search |
-| `sd` | Intuitive find/replace |
-| `sesh` | tmux session manager |
-| `ast-grep` | Structural code search/refactor |
-| `tmux` | Terminal multiplexer |
-| `tree` | Directory tree |
-| `uv` | Python package installer |
-| `watchexec` | Run command on file change |
-| `wget` | File downloader |
-| `xh` | Fast HTTP client |
-| `yazi` | File manager |
-| `zoxide` | Smarter `cd` |
+| Tool            | Purpose                           |
+| --------------- | --------------------------------- |
+| `act`           | Run GitHub Actions locally        |
+| `aspell` (+en)  | Spell checker                     |
+| `atuin`         | Shell history with search/sync    |
+| `bat`           | `cat` with syntax highlighting    |
+| `biome`         | JS/TS/JSON/CSS formatter + linter |
+| `btop` / `htop` | System / process monitors         |
+| `coreutils`     | GNU core utilities                |
+| `delta`         | Syntax-highlighting git pager     |
+| `difftastic`    | Structural diff                   |
+| `direnv`        | Per-directory environments        |
+| `dust`          | Disk usage analyzer               |
+| `eza`           | Modern `ls`                       |
+| `fd`            | Fast `find`                       |
+| `ffmpeg`        | Multimedia framework              |
+| `fzf`           | Fuzzy finder                      |
+| `gh`            | GitHub CLI                        |
+| `gitleaks`      | Secret scanner                    |
+| `glow`          | Terminal markdown renderer        |
+| `iftop`         | Network bandwidth monitor         |
+| `jq`            | JSON processor                    |
+| `lazygit`       | Git TUI                           |
+| `lazydocker`    | Container TUI (podman)            |
+| `macchina`      | System info fetch                 |
+| `mise`          | Per-project runtime manager       |
+| `mkcert`        | Local HTTPS certs                 |
+| `ngrok`         | Secure tunnels                    |
+| `pandoc`        | Document converter                |
+| `ripgrep`       | Fast text search                  |
+| `sd`            | Intuitive find/replace            |
+| `sesh`          | tmux session manager              |
+| `ast-grep`      | Structural code search/refactor   |
+| `tmux`          | Terminal multiplexer              |
+| `tree`          | Directory tree                    |
+| `uv`            | Python package installer          |
+| `watchexec`     | Run command on file change        |
+| `wget`          | File downloader                   |
+| `xh`            | Fast HTTP client                  |
+| `yazi`          | File manager                      |
+| `zoxide`        | Smarter `cd`                      |
 
 </details>
 
 <details>
 <summary><strong>Editors, languages &amp; container tooling</strong></summary>
 
-**Editors:** `helix`, `zed-editor`
-**Language runtimes (also via `mise` per-project):** `bun`, `go`, `nodejs_24`, `odin`
-**Dev environments / containers:** `devenv`, `podman`
+| Category                            | Tools                            |
+| ----------------------------------- | -------------------------------- |
+| Editors                             | `helix`, `zed-editor`            |
+| Language runtimes (also via `mise`) | `bun`, `go`, `nodejs_24`, `odin` |
+| Dev environments / containers       | `devenv`, `podman`               |
 
 **Helix language servers & formatters** (auto-wired once on PATH):
 
-| Language | LSP | Formatter |
-| --- | --- | --- |
-| TS / JS / JSX / TSX | `typescript-language-server` | biome |
-| Astro | `astro-language-server` | biome |
-| Svelte | `svelte-language-server` | biome |
-| HTML / CSS / JSON / ESLint | `vscode-langservers-extracted` | biome |
-| Tailwind / Emmet | `tailwindcss-language-server`, `emmet-ls` | — |
-| YAML | `yaml-language-server` | — |
-| Markdown | `marksman` | — |
-| TOML | `taplo` | taplo |
-| GraphQL | `graphql-language-service-cli` | biome |
-| Dockerfile | `dockerfile-language-server` | — |
-| Bash | `bash-language-server` | `shfmt` (+ `shellcheck`) |
-| Lua | `lua-language-server` | `stylua` |
-| SQL | `sqls` | — |
-| Python | `ruff`, `pyright` | ruff |
-| Rust | `rust-analyzer` | rustfmt (mise toolchain) |
-| PHP | `phpactor` | — |
-| Nix | `nixd` | `nixpkgs-fmt` (+ `statix`, `deadnix`) |
-| Go | `gopls`, `golangci-lint-langserver` | gofmt |
-| Liquid (Shopify) | `shopify-cli` theme LSP | — |
-| Odin | `ols` (built from source, see below) | `odinfmt` |
+| Language                   | LSP                                       | Formatter                             |
+| -------------------------- | ----------------------------------------- | ------------------------------------- |
+| TS / JS / JSX / TSX        | `typescript-language-server`              | biome                                 |
+| Astro                      | `astro-language-server`                   | biome                                 |
+| Svelte                     | `svelte-language-server`                  | biome                                 |
+| HTML / CSS / JSON / ESLint | `vscode-langservers-extracted`            | biome                                 |
+| Tailwind / Emmet           | `tailwindcss-language-server`, `emmet-ls` | —                                     |
+| YAML                       | `yaml-language-server`                    | —                                     |
+| Markdown                   | `marksman`                                | —                                     |
+| TOML                       | `taplo`                                   | taplo                                 |
+| GraphQL                    | `graphql-language-service-cli`            | biome                                 |
+| Dockerfile                 | `dockerfile-language-server`              | —                                     |
+| Bash                       | `bash-language-server`                    | `shfmt` (+ `shellcheck`)              |
+| Lua                        | `lua-language-server`                     | `stylua`                              |
+| SQL                        | `sqls`                                    | —                                     |
+| Python                     | `ruff`, `pyright`                         | ruff                                  |
+| Rust                       | `rust-analyzer`                           | rustfmt (mise toolchain)              |
+| PHP                        | `phpactor`                                | —                                     |
+| Nix                        | `nixd`                                    | `nixpkgs-fmt` (+ `statix`, `deadnix`) |
+| Go                         | `gopls`, `golangci-lint-langserver`       | gofmt                                 |
+| Liquid (Shopify)           | `shopify-cli` theme LSP                   | —                                     |
+| Odin                       | `ols` (built from source, see below)      | `odinfmt`                             |
 
 Extra linter: `oxlint`. Odin's `ols` isn't in nixpkgs (build broken against
 current Odin) — `setup.sh` builds it from source automatically.
@@ -125,21 +126,38 @@ current Odin) — `setup.sh` builds it from source automatically.
 <details>
 <summary><strong>GUI apps (Homebrew casks)</strong></summary>
 
-`arc`, `zen` (browsers) · `yaak` (API client) · `1password` · `figma` ·
-`tailscale-app` · `jordanbaird-ice` (menu-bar manager) · `stats` (menu-bar
-monitor) · `localsend` (file transfer) · `affinity` · `homerow` · `raycast` ·
-`setapp` · `discord` · `zoom`
+| Cask              | Purpose                       | Profiles  |
+| ----------------- | ----------------------------- | --------- |
+| `arc`             | Browser                       | all\*     |
+| `zen`             | Browser                       | all\*     |
+| `yaak`            | API client                    | all\*     |
+| `1password`       | Password manager              | all\*     |
+| `figma`           | Design                        | all\*     |
+| `tailscale-app`   | Mesh VPN                      | all\*     |
+| `jordanbaird-ice` | Menu-bar item manager         | all\*     |
+| `stats`           | Menu-bar system monitor       | all\*     |
+| `localsend`       | Cross-platform file transfer  | all\*     |
+| `adguard`         | Network-wide ad blocker       | all\*     |
+| `affinity`        | Design / SEO                  | all\*     |
+| `homerow`         | Keyboard-driven UI navigation | all\*     |
+| `raycast`         | Launcher                      | all\*     |
+| `setapp`          | App subscription manager      | all\*     |
+| `obsidian`        | Notes / knowledge base        | all\*     |
+| `discord`         | Communication                 | all\*     |
+| `zoom`            | Video conferencing            | all\*     |
+| `slack`           | Work comms                    | work only |
+
+\*all = `work` and `personal`. The `vm` profile installs **no** casks.
 
 </details>
 
 <details>
 <summary><strong>Fonts &amp; managed programs</strong></summary>
 
-**Fonts:** `jetbrains-mono`, `meslo-lgs-nf`, `hack-font`, `font-awesome`,
-`dejavu_fonts`, `noto-fonts` (+ color emoji)
-
-**home-manager programs:** `zsh`, `git`, `tmux`, `vim`, `ssh`, `alacritty`,
-`starship`, `zoxide`, `fzf`, `atuin`, `direnv`
+| Category              | Items                                                                                                       |
+| --------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Fonts                 | `jetbrains-mono`, `meslo-lgs-nf`, `hack-font`, `font-awesome`, `dejavu_fonts`, `noto-fonts` (+ color emoji) |
+| home-manager programs | `zsh`, `git`, `tmux`, `vim`, `ssh`, `alacritty`, `starship`, `zoxide`, `fzf`, `atuin`, `direnv`             |
 
 </details>
 
