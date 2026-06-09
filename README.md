@@ -288,13 +288,30 @@ gh ssh-key add ~/.ssh/id_agenix.pub --title "$(hostname)"
 
 Commits are signed with the same `id_agenix` key over SSH (`gpg.format = ssh` in
 the git config) — passphraseless, so it never prompts, and no GPG/gpg-agent to
-set up. For the green **Verified** badge, GitHub needs the key added a _second_
-time as a **Signing key** (auth and signing keys are tracked separately).
-`setup.sh` does this automatically when `gh` is authenticated; to do it by hand:
+set up.
+
+For the green **Verified** badge, two things must be true on GitHub:
+
+1. **`id_agenix.pub` is registered as a _Signing key_.** GitHub tracks
+   _Authentication_ and _Signing_ keys separately, so the key you already use to
+   push (an Authentication key) does **not** verify commits. **It's the same
+   public key** — just added a _second_ time with the type set to **Signing key**.
+2. **Your commit email is a _verified_ email on that same account** (Settings →
+   Emails). GitHub matches the committer email to the account that owns the
+   signing key; an unverified or mismatched email shows as Unverified.
+
+Easiest way — paste it in the web UI: GitHub → Settings → **SSH and GPG keys** →
+**New SSH key** → set **Key type: Signing Key** → paste the contents of
+`~/.ssh/id_agenix.pub`. Or via the CLI (note the extra scope — `gh auth login`
+does **not** grant it by default):
 
 ```sh
+gh auth refresh -h github.com -s admin:ssh_signing_key
 gh ssh-key add ~/.ssh/id_agenix.pub --type signing --title "$(hostname)-signing"
 ```
+
+Once both are in place, GitHub re-verifies at display time, so existing signed
+commits flip to Verified too — no rebase needed.
 
 Add this machine to the `machines` map in `config.nix` if your user isn't there,
 then commit it (flakes ignore untracked files). The label is yours to pick; the
