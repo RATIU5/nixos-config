@@ -11,6 +11,15 @@
     nix-homebrew = {
       url = "github:zhaofengli-wip/nix-homebrew";
     };
+    # Override the Homebrew CLI source. nix-homebrew pins brew 5.1.11, which
+    # has no macOS 27 ("Golden Gate") support and dies with
+    # `unknown or unsupported macOS version: :dunno`. Pinned to the head of
+    # Homebrew PR #22592 (preliminary macOS 27 support). Drop this override and
+    # the nix-homebrew.package line below once that lands in a tagged release.
+    brew-src = {
+      url = "github:Homebrew/brew/7750fa03645dc7b72f35dfde2d766bea3b006866";
+      flake = false;
+    };
     homebrew-bundle = {
       url = "github:homebrew/homebrew-bundle";
       flake = false;
@@ -39,7 +48,7 @@
       flake = false;
     };
   };
-  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, homebrew-bobrwm, home-manager, nixpkgs, agenix, secrets, sf-mono-liga-src } @inputs:
+  outputs = { self, darwin, nix-homebrew, brew-src, homebrew-bundle, homebrew-core, homebrew-cask, homebrew-bobrwm, home-manager, nixpkgs, agenix, secrets, sf-mono-liga-src } @inputs:
     let
       # All personal settings (name, email, machines) live in config.nix —
       # edit that one file to make this repo yours.
@@ -90,6 +99,20 @@
                   nix-homebrew = {
                     inherit user;
                     enable = true;
+                    # See the brew-src input above (macOS 27 support).
+                    package = inputs.brew-src // {
+                      name = "brew-5.1.15-macos27";
+                      version = "5.1.15";
+                    };
+                    # The newer brew (from brew-src) defaults
+                    # HOMEBREW_REQUIRE_TAP_TRUST=true, which refuses to load
+                    # formulae from third-party taps (e.g. bobrwm/tap) until
+                    # `brew trust`ed. nix-homebrew runs brew non-interactively,
+                    # so opt out declaratively. Tied to the brew-src override;
+                    # remove both together.
+                    extraEnv = {
+                      HOMEBREW_NO_REQUIRE_TAP_TRUST = "1";
+                    };
                     taps = {
                       "homebrew/homebrew-core" = homebrew-core;
                       "homebrew/homebrew-cask" = homebrew-cask;

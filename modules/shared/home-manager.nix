@@ -461,7 +461,13 @@
       # Remove Vim mode delays
       set -g focus-events on
 
-      # Enable full mouse support
+      # Forward extended keys (kitty keyboard protocol) to apps inside tmux so
+      # Shift+Enter, Ctrl+Enter, etc. are distinguishable from plain Enter.
+      set -s extended-keys always
+      set -as terminal-features 'xterm*:extkeys'
+
+      # Enable full mouse support (wheel scrolls scrollback at the prompt
+      # instead of sending arrow keys)
       set -g mouse on
 
       # -----------------------------------------------------------------------------
