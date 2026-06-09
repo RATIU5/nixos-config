@@ -19,7 +19,7 @@ file, point it at your secrets repo, run `./setup.sh`. Done.
 - **Batteries-included Zsh**: starship, zoxide, fzf, atuin, eza, autosuggestions
 - **[Helix](https://helix-editor.com)** wired for ~25 languages (LSPs + formatters), with per-project runtimes via [mise](https://mise.jdx.dev)
 - **One passphraseless** agenix key bootstraps every machine
-- **Catppuccin-themed** Ghostty, Helix, Yazi, tmux, and starship (in `dotfiles/`)
+- **Catppuccin Mocha** across Ghostty, Helix, Yazi, tmux, fzf, and starship — themed for **transparency**, so backgrounds inherit Ghostty's translucent/blurred window (see [Theming](#theming))
 
 ## Layout
 
@@ -159,9 +159,46 @@ current Odin) — `setup.sh` builds it from source automatically.
 | Category              | Items                                                                                                       |
 | --------------------- | ----------------------------------------------------------------------------------------------------------- |
 | Fonts                 | `jetbrains-mono`, `meslo-lgs-nf`, `hack-font`, `font-awesome`, `dejavu_fonts`, `noto-fonts` (+ color emoji) |
-| home-manager programs | `zsh`, `git`, `tmux`, `vim`, `ssh`, `alacritty`, `starship`, `zoxide`, `fzf`, `atuin`, `direnv`             |
+| home-manager programs | `zsh`, `git`, `tmux`, `vim`, `ssh`, `starship`, `zoxide`, `fzf`, `atuin`, `direnv`                          |
 
 </details>
+
+## Theming
+
+Everything is **Catppuccin Mocha**, themed to preserve terminal transparency.
+Ghostty runs at `background-opacity = 0.70` with background blur, so the rule for
+every tool is the same: **theme the foreground and accents, but leave the base
+background as the terminal default** — never paint it with Catppuccin's opaque
+`#1e1e2e`. That way the translucent window shows through everywhere.
+
+| Tool         | Where it lives                                   | How transparency is kept                                      |
+| ------------ | ------------------------------------------------ | ------------------------------------------------------------- |
+| **Ghostty**  | `dotfiles/config/ghostty/config`                 | `theme = Catppuccin Mocha` + `background-opacity = 0.70`      |
+| **tmux**     | `dotfiles/config/tmux/tmux.conf`                 | Mocha hexes inline; status/window styles use `bg=default`     |
+| **fzf**      | `modules/shared/home-manager.nix` (`programs.fzf`) | Mocha `--color` flags with `bg:-1` (terminal background)    |
+| **Helix**    | `dotfiles/config/helix/themes/catppuccin_opaque.toml` | custom variant; swap to stock `catppuccin_mocha` for clear bg |
+| **Yazi**     | `dotfiles/config/yazi/theme.toml`                | Mocha hexes; no full-window background fill                   |
+| **starship** | `dotfiles/config/starship.toml`                  | `palette = "catppuccin_mocha"` (prompt only, no bg)           |
+| **bat**      | `dotfiles/config/bat/bat.conf`                   | `--theme="base16"` inherits the terminal's Catppuccin palette |
+
+### Adding Catppuccin to another tool
+
+Most CLI tools have an [official Catppuccin port](https://github.com/catppuccin).
+The general recipe, keeping transparency:
+
+- **btop** — drop the Mocha theme from [`catppuccin/btop`](https://github.com/catppuccin/btop)
+  into `dotfiles/config/btop/themes/`, set `color_theme` in `btop.conf`, and edit
+  the theme's `theme[main_bg]=""` so the background stays transparent.
+- **lazygit** — add the [`catppuccin/lazygit`](https://github.com/catppuccin/lazygit)
+  Mocha `gui.theme` block to its `config.yml`; it sets borders/selection only (no
+  base background), so it's transparent by default.
+- **delta** — `include` the `catppuccin.gitconfig` from
+  [`catppuccin/delta`](https://github.com/catppuccin/delta) and set
+  `delta.features = catppuccin-mocha` in the git config.
+
+Vendor the theme file under `dotfiles/config/<tool>/` (it auto-links to
+`~/.config/<tool>/`), `git add` it, then `nix run .#build-switch`. Tools that
+cache compiled themes (`bat`, `btop`) need their cache rebuilt once after.
 
 ## Making it yours
 

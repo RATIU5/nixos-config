@@ -24,7 +24,18 @@
     enable = true;
     enableZshIntegration = true;
     defaultCommand = "fd --type f --hidden --follow --exclude .git";
-    defaultOptions = [ "--height 40%" "--layout=reverse" "--border" ];
+    defaultOptions = [
+      "--height 40%"
+      "--layout=reverse"
+      "--border"
+      # Catppuccin Mocha. `bg:-1` keeps the terminal's (transparent) background;
+      # only the selection line (bg+) gets a solid surface color for contrast.
+      "--color=bg:-1,bg+:#313244,spinner:#f5e0dc,hl:#f38ba8"
+      "--color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc"
+      "--color=marker:#b4befe,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8"
+      "--color=selected-bg:#45475a"
+      "--color=border:#6c7086,label:#cdd6f4"
+    ];
     fileWidgetCommand = "fd --type f --hidden --follow --exclude .git";
     changeDirWidgetCommand = "fd --type d --hidden --follow --exclude .git";
     fileWidgetOptions = [
