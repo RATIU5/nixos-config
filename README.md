@@ -1,5 +1,7 @@
 # RATIU5' macOS Nix Config
 
+![example](./example.png)
+
 A reproducible **Apple Silicon macOS** setup, declared with
 [nix-darwin](https://github.com/LnL7/nix-darwin) +
 [home-manager](https://github.com/nix-community/home-manager). One script takes a
@@ -169,7 +171,7 @@ user). Edit that one file.
 
 The **one** thing that can't live in `config.nix` is the private secrets repo
 URL. Nix evaluates the flake `inputs` block before any expression runs, so an
-input URL *must* be a string literal — it cannot read `config.nix`. Point
+input URL _must_ be a string literal — it cannot read `config.nix`. Point
 `inputs.secrets.url` in `flake.nix` at your own repo (see the forking section
 below). Everything else is derived from `config.nix`.
 
@@ -248,7 +250,7 @@ gh ssh-key add ~/.ssh/id_agenix.pub --title "$(hostname)"
 
 Commits are signed with the same `id_agenix` key over SSH (`gpg.format = ssh` in
 the git config) — passphraseless, so it never prompts, and no GPG/gpg-agent to
-set up. For the green **Verified** badge, GitHub needs the key added a *second*
+set up. For the green **Verified** badge, GitHub needs the key added a _second_
 time as a **Signing key** (auth and signing keys are tracked separately).
 `setup.sh` does this automatically when `gh` is authenticated; to do it by hand:
 
@@ -283,7 +285,7 @@ domains — most notably `com.apple.universalaccess` (reduce motion/transparency
 Could not write domain com.apple.universalaccess; exiting
 ```
 
-and aborts *before* the Homebrew step, so **casks never get installed**.
+and aborts _before_ the Homebrew step, so **casks never get installed**.
 
 1. System Settings → Privacy & Security → **Full Disk Access**
 2. Add and enable your terminal app (this config ships **Ghostty**; add Terminal/iTerm too if you bootstrap from them)
