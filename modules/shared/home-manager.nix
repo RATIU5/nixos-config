@@ -279,6 +279,11 @@
       user.signingKey = "/Users/${user}/.ssh/id_agenix.pub";
       pull.rebase = true;
       rebase.autoStash = true;
+      # Always reach GitHub over SSH (using id_agenix) even when a remote is
+      # configured with an https:// URL. Without this, pushing to an https
+      # remote uses HTTPS auth and prompts for a username/password instead of
+      # the SSH key in ssh.settings."github.com" below.
+      url."git@github.com:".insteadOf = "https://github.com/";
     };
   };
 
