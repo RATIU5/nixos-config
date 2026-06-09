@@ -3,13 +3,11 @@
 # repo yours (plus the secrets repo URL in flake.nix, see note at the bottom).
 # ────────────────────────────────────────────────────────────────────────────
 {
-  # Your name and email, used for the git config.
+  # Your name and email, used for the git config. The email must be a *verified*
+  # email on your GitHub account, or commits signed with id_agenix won't show as
+  # Verified (GitHub matches the committer email to the signing key's account).
   fullName = "John Memmott";
   email    = "me@ratiu5.dev";
-
-  # Your GitHub username — used to generate the `gh` CLI hosts file
-  # (dotfiles/config/gh/hosts.yml is auto-generated from this).
-  githubUser = "RATIU5";
 
   # Machines you build on (Apple Silicon only). The attribute name
   # (work/personal/...) is the build label selected by `nix run .#build-switch`;
