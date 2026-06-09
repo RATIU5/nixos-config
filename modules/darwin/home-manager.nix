@@ -1,4 +1,4 @@
-{ config, pkgs, lib, home-manager, user, profile, fullName, email, githubUser, ... }:
+{ config, pkgs, lib, home-manager, user, profile, fullName, email, ... }:
 
 {
   users.users.${user} = {
@@ -65,20 +65,15 @@
         # wiring needed. Copied into the Nix store (Option B: reproducible; edit
         # then `nix run .#build-switch`). recursive = true links files one-by-one
         # so apps can still write sibling state into the directory.
-        xdg.configFile = (builtins.mapAttrs
+        # gh/hosts.yml is intentionally NOT managed here. `gh auth login` stores
+        # its OAuth token in that file, so it must stay writable — a read-only
+        # Nix-store symlink makes auth fail with "permission denied". Because the
+        # auto-linker uses recursive = true, ~/.config/gh is a real directory, so
+        # gh creates and owns hosts.yml itself on first login. The static
+        # settings in dotfiles/config/gh/config.yml are still linked below.
+        xdg.configFile = builtins.mapAttrs
           (name: _: { source = ../../dotfiles/config + "/${name}"; recursive = true; })
-          (builtins.readDir ../../dotfiles/config))
-        # gh CLI host file is generated from config.nix (githubUser) rather than
-        # checked in, so a fork doesn't ship someone else's username.
-        // {
-          "gh/hosts.yml".text = ''
-            github.com:
-                git_protocol: https
-                users:
-                    ${githubUser}:
-                user: ${githubUser}
-          '';
-        };
+          (builtins.readDir ../../dotfiles/config);
         programs = {} // import ../shared/home-manager.nix { inherit config pkgs lib user fullName email; };
         manual.manpages.enable = false;
       };

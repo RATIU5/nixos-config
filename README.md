@@ -202,9 +202,10 @@ cache compiled themes (`bat`, `btop`) need their cache rebuilt once after.
 
 ## Making it yours
 
-Everything personal lives in **`config.nix`** — name, email, `githubUser` (used
-to generate the `gh` CLI host file), and the `machines` map (build label → macOS
-user). Edit that one file.
+Everything personal lives in **`config.nix`** — name, email, and the `machines`
+map (build label → macOS user). Edit that one file. Use a GitHub-**verified**
+email so your `id_agenix`-signed commits show as Verified (see
+[Commit signing](#commit-signing)).
 
 The **one** thing that can't live in `config.nix` is the private secrets repo
 URL. Nix evaluates the flake `inputs` block before any expression runs, so an
