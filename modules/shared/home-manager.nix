@@ -28,7 +28,7 @@
     fileWidgetCommand = "fd --type f --hidden --follow --exclude .git";
     changeDirWidgetCommand = "fd --type d --hidden --follow --exclude .git";
     fileWidgetOptions = [
-      ''--preview "bat --color=always --style=numbers --line-range=:500 {}"''
+      "--preview 'bat --color=always --style=numbers --line-range=:500 {}'"
     ];
   };
 
