@@ -29,9 +29,10 @@
       # bobrwm: HEAD-only Zig tiling WM from the bobrwm/tap tap (registered in
       # nix-homebrew.taps). Builds from source on install; pulls zig as a dep.
       { name = "bobrwm/tap/bobrwm"; args = [ "HEAD" ]; }
-      # odin: latest-release bottle. The nixpkgs build breaks on the new Apple
-      # SDK; Homebrew tracks current odin and stays in sync with ols master
-      # (built from source in setup.sh). `brew upgrade odin` to update.
+      # odin: latest-release bottle. The nixpkgs build breaks on Apple SDK 26
+      # (compiler-rt-libc-18 fails); Homebrew tracks current odin and is what
+      # OLS is built from source against (see modules/shared/packages.nix).
+      # `brew upgrade odin` to update both together.
       "odin"
     ];
     #masApps = {
@@ -76,6 +77,12 @@
           (builtins.readDir ../../dotfiles/config);
         programs = {} // import ../shared/home-manager.nix { inherit config pkgs lib user fullName email; };
         manual.manpages.enable = false;
+        # Clone and compile OLS from source against the Homebrew odin on each
+        # activation. The script is a no-op when the repo is already current.
+        home.activation.buildOls = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          $DRY_RUN_CMD ${pkgs.writeShellScript "build-ols"
+            (builtins.readFile ./scripts/build-ols.sh)}
+        '';
       };
   };
 }

@@ -61,9 +61,9 @@ with pkgs; [
   go # Go
   nodejs_24 # Node.js (includes npm)
   # odin: installed via Homebrew (modules/darwin/home-manager.nix `brews`), not
-  # nixpkgs. The nixpkgs build breaks on the new Apple SDK, and pinning it to an
-  # old stable left it out of sync with current ols. Homebrew tracks the latest
-  # odin release (`brew upgrade odin`) and matches ols master.
+  # nixpkgs. The nixpkgs build breaks on Apple SDK 26 (compiler-rt-libc-18 fails
+  # to build). Homebrew tracks the latest odin release; `brew upgrade odin`
+  # to update. OLS is built from source against this Homebrew odin (see below).
 
   # Editors
   helix # Modal terminal editor
@@ -99,13 +99,10 @@ with pkgs; [
   rust-analyzer # Rust LSP (toolchain itself via `mise use rust@...`)
   phpactor # PHP
   nixd # Nix (smarter than nil for flakes)
-  # ols (Odin LSP) omitted: nixpkgs build is broken against current Odin.
-  # Build from source against the Homebrew odin on PATH (both track latest):
-  #   git clone https://github.com/DanielGavin/ols ~/.local/share/ols
-  #   cd ~/.local/share/ols && ./build.sh && ./odinfmt.sh
-  #   ln -sf ~/.local/share/ols/{ols,odinfmt} ~/.local/bin/
-  # OLS_BUILTIN_FOLDER is exported in home-manager.nix; odinfmt is wired as the
-  # Odin formatter in dotfiles/config/helix/languages.toml.
+  # ols (Odin LSP) omitted from nixpkgs: build is broken against Apple SDK 26
+  # (compiler-rt-libc-18 / LLVM 18 fails). Built from source via home-manager
+  # activation (modules/darwin/scripts/build-ols.sh) against Homebrew odin.
+  # OLS_BUILTIN_FOLDER is exported in home-manager.nix.
   gopls # Go
   golangci-lint-langserver # Go linting (referenced in languages.toml)
   shopify-cli # Shopify Liquid: `shopify theme language-server`

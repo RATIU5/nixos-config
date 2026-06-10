@@ -149,7 +149,7 @@
       export VISUAL="hx"
 
       # Odin LSP (ols) is built manually from source (nixpkgs build is broken
-      # against our Odin). It needs its builtin/ folder pointed to explicitly
+      # on Apple SDK 26). It needs its builtin/ folder pointed to explicitly
       # since the binary is symlinked onto PATH. See modules/shared/packages.nix.
       export OLS_BUILTIN_FOLDER="$HOME/.local/share/ols/builtin"
 
