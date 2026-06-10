@@ -474,7 +474,10 @@
 
       # Forward extended keys (kitty keyboard protocol) to apps inside tmux so
       # Shift+Enter, Ctrl+Enter, etc. are distinguishable from plain Enter.
+      # csi-u format sends Shift+Enter as `\x1b[13;2u`; the default `xterm`
+      # format sends `\x1b[27;2;13~`, which Claude Code / opencode mis-handle.
       set -s extended-keys always
+      set -g extended-keys-format csi-u
       set -as terminal-features 'xterm*:extkeys'
 
       # Enable full mouse support (wheel scrolls scrollback at the prompt

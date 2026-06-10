@@ -219,3 +219,9 @@ macos-titlebar-style = transparent
 # keyprotocol=ghostty:kitty`, however a bug in the implementation prevents it
 # from working properly. https://github.com/vim/vim/pull/13211 fixes this.
 term = xterm-ghostty
+
+# Make Shift+Enter insert a newline instead of submitting in CLI tools
+# (Claude Code, opencode, codex, REPLs). This sends a raw line feed (same byte
+# as Ctrl+J), which passes cleanly through tmux regardless of keyboard-protocol
+# negotiation, so it works even when the kitty/CSI-u path doesn't.
+keybind = shift+enter=text:\n
