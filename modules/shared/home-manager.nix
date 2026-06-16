@@ -441,8 +441,13 @@
       prefix-highlight
       {
         plugin = power-theme;
+        # tmux-power's theme accepts a custom accent color (hex) instead of a
+        # named theme. Using a Catppuccin Mocha accent keeps the powerline look
+        # but recolors it. Swap the hex for another Catppuccin accent, e.g.
+        # mauve '#cba6f7', blue '#89b4fa', green '#a6e3a1', red '#f38ba8'.
+        # (Segment background grays are tmux-power's own and aren't configurable.)
         extraConfig = ''
-           set -g @tmux_power_theme 'gold'
+           set -g @tmux_power_theme '#fab387'
         '';
       }
       {
@@ -465,74 +470,17 @@
       }
     ];
     terminal = "screen-256color";
-    prefix = "C-x";
+    prefix = "C-s";
     escapeTime = 10;
     historyLimit = 50000;
+    # All hand-written settings, bindings, and theming live in
+    # dotfiles/config/tmux/tmux.conf (the editable source of truth). This block
+    # only manages plugins; home-manager appends their `run-shell` lines AFTER
+    # this extraConfig, so plugin bindings (e.g. vim-tmux-navigator's C-hjkl)
+    # take effect on top of the sourced config. See modules/darwin/home-manager.nix
+    # for why tmux is excluded from the dotfiles auto-linker.
     extraConfig = ''
-      # Remove Vim mode delays
-      set -g focus-events on
-
-      # Forward extended keys (kitty keyboard protocol) to apps inside tmux so
-      # Shift+Enter, Ctrl+Enter, etc. are distinguishable from plain Enter.
-      # csi-u format sends Shift+Enter as `\x1b[13;2u`; the default `xterm`
-      # format sends `\x1b[27;2;13~`, which Claude Code / opencode mis-handle.
-      set -s extended-keys always
-      set -g extended-keys-format csi-u
-      set -as terminal-features 'xterm*:extkeys'
-
-      # Enable full mouse support (wheel scrolls scrollback at the prompt
-      # instead of sending arrow keys)
-      set -g mouse on
-
-      # -----------------------------------------------------------------------------
-      # Key bindings
-      # -----------------------------------------------------------------------------
-
-      # Unbind default keys
-      unbind C-b
-      unbind '"'
-      unbind %
-
-      # Split panes, vertical or horizontal
-      bind-key x split-window -v
-      bind-key v split-window -h
-
-      # Move around panes with vim-like bindings (h,j,k,l)
-      bind-key -n M-k select-pane -U
-      bind-key -n M-h select-pane -L
-      bind-key -n M-j select-pane -D
-      bind-key -n M-l select-pane -R
-
-      # Smart pane switching with awareness of Vim splits.
-      # This is copy paste from https://github.com/christoomey/vim-tmux-navigator
-      is_vim="ps -o state= -o comm= -t '#{pane_tty}' \
-        | grep -iqE '^[^TXZ ]+ +(\\S+\\/)?g?(view|n?vim?x?)(diff)?$'"
-      bind-key -n 'C-h' if-shell "$is_vim" 'send-keys C-h'  'select-pane -L'
-      bind-key -n 'C-j' if-shell "$is_vim" 'send-keys C-j'  'select-pane -D'
-      bind-key -n 'C-k' if-shell "$is_vim" 'send-keys C-k'  'select-pane -U'
-      bind-key -n 'C-l' if-shell "$is_vim" 'send-keys C-l'  'select-pane -R'
-      tmux_version='$(tmux -V | sed -En "s/^tmux ([0-9]+(.[0-9]+)?).*/\1/p")'
-      if-shell -b '[ "$(echo "$tmux_version < 3.0" | bc)" = 1 ]' \
-        "bind-key -n 'C-\\' if-shell \"$is_vim\" 'send-keys C-\\'  'select-pane -l'"
-      if-shell -b '[ "$(echo "$tmux_version >= 3.0" | bc)" = 1 ]' \
-        "bind-key -n 'C-\\' if-shell \"$is_vim\" 'send-keys C-\\\\'  'select-pane -l'"
-
-      bind-key -T copy-mode-vi 'C-h' select-pane -L
-      bind-key -T copy-mode-vi 'C-j' select-pane -D
-      bind-key -T copy-mode-vi 'C-k' select-pane -U
-      bind-key -T copy-mode-vi 'C-l' select-pane -R
-      bind-key -T copy-mode-vi 'C-\' select-pane -l
-
-      # sesh session manager — prefix + s opens a fuzzy popup of sessions,
-      # zoxide dirs, and configured projects (replaces the default session list).
-      bind-key s display-popup -E -w 60% -h 50% "sesh connect \"$(
-        sesh list --icons | fzf --no-sort --ansi --prompt '⚡ ' \
-          --header 'sesh: switch session/project'
-      )\""
-
-      # Darwin-specific fix for tmux 3.5a with sensible plugin
-      # This MUST be at the very end of the config
-      set -g default-command "$SHELL"
+      source-file ${../../dotfiles/config/tmux/tmux.conf}
       '';
     };
 }

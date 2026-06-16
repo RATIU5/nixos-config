@@ -29,7 +29,9 @@ else
     REMOTE=$(git -C "$OLS_DIR" rev-parse FETCH_HEAD)
     if [[ "$LOCAL" != "$REMOTE" ]]; then
       echo "[ols] updating..."
-      git -C "$OLS_DIR" merge --ff-only FETCH_HEAD
+      # Shallow clone: FETCH_HEAD shares no history with HEAD, so a merge fails
+      # with "unrelated histories". This is a build-only mirror, so just reset.
+      git -C "$OLS_DIR" reset --hard FETCH_HEAD
       NEEDS_BUILD=1
     fi
   else
