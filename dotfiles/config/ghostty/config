@@ -221,7 +221,12 @@ macos-titlebar-style = transparent
 term = xterm-ghostty
 
 # Make Shift+Enter insert a newline instead of submitting in CLI tools
-# (Claude Code, opencode, codex, REPLs). This sends a raw line feed (same byte
-# as Ctrl+J), which passes cleanly through tmux regardless of keyboard-protocol
-# negotiation, so it works even when the kitty/CSI-u path doesn't.
-keybind = shift+enter=text:\n
+# (Claude Code, opencode, codex, REPLs).
+#
+# We emit the kitty/CSI-u encoding for Shift+Enter (ESC[13;2u) rather than a
+# raw line feed. A raw `\n` is byte-identical to Ctrl+J, which vim-tmux-navigator
+# binds (root table) to "select pane below" — so inside tmux Shift+Enter would
+# move panes instead of inserting a newline. The CSI-u sequence is a distinct
+# key that tmux forwards (extended-keys-format csi-u) and apps decode as
+# Shift+Enter, leaving Ctrl+J pane navigation intact.
+keybind = shift+enter=csi:13;2u
