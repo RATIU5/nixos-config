@@ -144,10 +144,6 @@
       loginwindow = {
         GuestEnabled = false;
       };
-      universalaccess = {
-        reduceMotion = true;        # minimize accessibility animations
-        reduceTransparency = true;  # drop blur/transparency effects
-      };
       trackpad = {
         Clicking = true;
         TrackpadThreeFingerDrag = true;

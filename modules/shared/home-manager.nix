@@ -63,13 +63,7 @@
     cdpath = [ "~/.local/share/src" ];
     # Migrated from dotfiles/config/shell/sources.sh (Homebrew zsh-autosuggestions).
     autosuggestion.enable = true;
-    plugins = [
-      {
-          name = "zsh-autocomplete";
-          src = pkgs.zsh-autocomplete;
-          file = "share/zsh-autocomplete/zsh-autocomplete.plugin.zsh";
-      }
-    ];
+    plugins = [ ];
     # Migrated from dotfiles/config/shell/aliases.sh. Simple 1:1 aliases live
     # here; functions and conditional aliases stay in initContent below.
     shellAliases = {
@@ -469,7 +463,7 @@
         '';
       }
     ];
-    terminal = "screen-256color";
+    terminal = "tmux-256color";
     prefix = "C-s";
     escapeTime = 10;
     historyLimit = 50000;
