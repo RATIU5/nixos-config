@@ -160,6 +160,7 @@
       export PATH="$HOME/.cargo/bin:/opt/homebrew/bin:$PATH"
       export PATH="$HOME/.opencode/bin:$PATH"
       export PATH="$HOME/.local/bin:$PATH"
+      [ -d "$HOME/.cache/.bun/bin" ] && export PATH="$HOME/.cache/.bun/bin:$PATH"
 
       # Remove history data we don't want to see
       export HISTIGNORE="pwd:ls:cd"
