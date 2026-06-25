@@ -155,6 +155,7 @@
       export PATH=$HOME/.local/share/src/conductly/bin:$PATH
       export PATH=$HOME/.local/share/src/conductly/utils:$PATH
       export PYTHONPATH="$HOME/.local-pip/packages:$PYTHONPATH"
+      export PATH="$HOME/.cache/.bun/bin:$PATH"
 
       # PATH (migrated from dotfiles/config/shell/paths.sh)
       export PATH="$HOME/.cargo/bin:/opt/homebrew/bin:$PATH"
