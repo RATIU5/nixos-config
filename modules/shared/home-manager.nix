@@ -253,8 +253,6 @@
           esac
       }
 
-      ln -s "$(which bun)" /usr/local/bin/node
-
       # Auto-start tmux on new interactive terminal if not already inside one
       if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
         exec tmux

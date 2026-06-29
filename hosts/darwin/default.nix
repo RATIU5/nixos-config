@@ -218,6 +218,11 @@
       # Spotlight ⌘Space disable applies without a logout.
       echo "applying symbolic hotkeys..." >&2
       sudo -u ${user} /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u || true
+
+      # Make `#!/usr/bin/env node` shebangs run bun.
+      echo "linking node -> bun..." >&2
+      mkdir -p /usr/local/bin
+      ln -sf ${pkgs.bun}/bin/bun /usr/local/bin/node
     '';
   };
 }
