@@ -38,6 +38,12 @@
       url = "github:bobrwm/homebrew-tap";
       flake = false;
     };
+    # Third-party tap for omp (oh-my-pi coding agent CLI). `can1357/tap` ->
+    # github.com/can1357/homebrew-tap by Homebrew convention.
+    homebrew-can1357 = {
+      url = "github:can1357/homebrew-tap";
+      flake = false;
+    };
     secrets = {
       url = "git+ssh://git@github.com/RATIU5/nix-secrets.git";
       flake = false;
@@ -48,7 +54,7 @@
       flake = false;
     };
   };
-  outputs = { self, darwin, nix-homebrew, brew-src, homebrew-bundle, homebrew-core, homebrew-cask, homebrew-bobrwm, home-manager, nixpkgs, agenix, secrets, sf-mono-liga-src } @inputs:
+  outputs = { self, darwin, nix-homebrew, brew-src, homebrew-bundle, homebrew-core, homebrew-cask, homebrew-bobrwm, homebrew-can1357, home-manager, nixpkgs, agenix, secrets, sf-mono-liga-src } @inputs:
     let
       # All personal settings (name, email, machines) live in config.nix —
       # edit that one file to make this repo yours.
@@ -112,12 +118,22 @@
                     # remove both together.
                     extraEnv = {
                       HOMEBREW_NO_REQUIRE_TAP_TRUST = "1";
+                      # Brew 5.1.x's HOMEBREW_FORBID_PACKAGES_FROM_PATHS check
+                      # rejects formulae whose realpath resolves outside
+                      # Library/Taps — i.e. every nix-homebrew symlinked
+                      # third-party tap ("Homebrew requires formulae to be in a
+                      # tap, rejecting ... (/nix/store/...)"). Setting
+                      # HOMEBREW_DEVELOPER is the only opt-out on 5.1.x; fixed
+                      # properly in brew >= 6.0.1 (Homebrew/brew#22872), so
+                      # remove alongside the brew-src pin.
+                      HOMEBREW_DEVELOPER = "1";
                     };
                     taps = {
                       "homebrew/homebrew-core" = homebrew-core;
                       "homebrew/homebrew-cask" = homebrew-cask;
                       "homebrew/homebrew-bundle" = homebrew-bundle;
                       "bobrwm/homebrew-tap" = homebrew-bobrwm;
+                      "can1357/homebrew-tap" = homebrew-can1357;
                     };
                     mutableTaps = false;
                     autoMigrate = true;

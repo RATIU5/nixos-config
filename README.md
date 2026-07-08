@@ -8,6 +8,7 @@ Reproducible **Apple Silicon macOS** setup using [nix-darwin](https://github.com
 - Zsh with starship, zoxide, fzf, atuin, eza, autosuggestions
 - [Helix](https://helix-editor.com) pre-wired for ~25 languages (LSPs + formatters) via [mise](https://mise.jdx.dev)
 - Encrypted secrets via [agenix](https://github.com/ryantm/agenix) — one passphraseless key per machine
+- Second-brain Obsidian vault at `~/brain`, auto-cloned on activation from the private [`nix-ai-brain`](https://github.com/RATIU5/nix-ai-brain) repo (content lives in git, not Nix)
 - Catppuccin Mocha across Ghostty, Helix, Yazi, tmux, fzf, and starship
 
 ## Layout
@@ -133,6 +134,40 @@ dotfiles/config/      # tool configs (auto-linked to ~/.config/)
 \*all = `work` and `personal`. The `vm` profile installs no casks.
 
 </details>
+
+## AI second brain (omp + Obsidian)
+
+A terminal-first knowledge stack: [omp](https://github.com/can1357/oh-my-pi) (AI coding agent, installed via the `can1357/tap` brew) working against an Obsidian vault at `~/brain`.
+
+**The pieces**
+
+| Piece | Where | Managed by |
+| ----- | ----- | ---------- |
+| omp CLI | `brew` list in `modules/darwin/home-manager.nix` | Nix (declarative) |
+| Obsidian app | `modules/darwin/casks.nix` | Nix (declarative) |
+| Vault | `~/brain`, cloned from private [`nix-ai-brain`](https://github.com/RATIU5/nix-ai-brain) | `home.activation.cloneBrain` bootstraps; content is plain git |
+| [obsidian-skills](https://github.com/kepano/obsidian-skills) | `~/.omp/agent/skills/` (5 skills: obsidian-markdown, obsidian-bases, json-canvas, obsidian-cli, defuddle) | imperative (copied) |
+| [obsidian-second-brain](https://github.com/eugeniughelbur/obsidian-second-brain) | repo at `~/.local/share/obsidian-second-brain`, linked via `omp install ./dist/pi` | imperative |
+| Pack config | `~/.config/obsidian-second-brain/.env` — `OBSIDIAN_VAULT_PATH=~/brain`, `OBSIDIAN_SEARCH_SEMANTIC=0` (keyword search only; flip to 1 later if it misses) | imperative |
+| Global agent rules | `~/.omp/agent/AGENTS.md` (learning-mode rules; project copy at `~/brain/templates/AGENTS.project-template.md`) | imperative |
+
+**Daily use**
+
+```bash
+cd ~/brain && omp        # start the agent from the vault root
+```
+
+Inside omp:
+- `/obsidian-daily`, `/obsidian-save`, `/obsidian-find`, `/obsidian-recap`, … — second-brain commands (tab-complete `/obsidian-`)
+- `/research`, `/research-deep`, `/youtube` — research toolkit (needs API keys in the `.env` above)
+- `/skill:obsidian-second-brain` and `/skill:obsidian-markdown` etc. — skills load on demand
+- `omp plugin list` / `omp plugin doctor` — verify the pack is registered
+
+The AGENTS.md rules make omp teach as it works: it explains its approach and key tradeoff before non-trivial code, and asks you to predict behavior before revealing solutions. Capture what you learn with `~/brain/templates/learning-note.md` (Date / Task / What I predicted / What actually happened / Concept learned / What still confuses me / Link to code).
+
+**Using the vault in Obsidian:** open Obsidian → *Open folder as vault* → `~/brain` (one-time; it remembers). omp and Obsidian share the same markdown files — no plugin needed; Obsidian live-reloads edits omp makes on disk. Sync is just git: commit/push in `~/brain`.
+
+**Rebuilding a machine:** the Nix side (omp, Obsidian, vault clone) comes back automatically with `build-switch`; re-run the imperative pack installs above (kepano copy + `omp install`) by hand.
 
 ## Setup
 

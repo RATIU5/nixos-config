@@ -34,6 +34,9 @@
       # OLS is built from source against (see modules/shared/packages.nix).
       # `brew upgrade odin` to update both together.
       "odin"
+      # omp (oh-my-pi): AI coding agent CLI from can1357/tap (registered in
+      # nix-homebrew.taps). The formula installs zsh completions itself.
+      "can1357/tap/omp"
     ];
     #masApps = {
     #  "hidden-bar"   = 1452453066;
@@ -88,6 +91,15 @@
         home.activation.buildOls = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
           $DRY_RUN_CMD ${pkgs.writeShellScript "build-ols"
             (builtins.readFile ./scripts/build-ols.sh)}
+        '';
+        # Second-brain Obsidian vault: clone the private repo to ~/brain on
+        # first activation (no-op when it already exists). Content lives in
+        # git, not Nix — nix only bootstraps the checkout.
+        home.activation.cloneBrain = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          if [ ! -d "$HOME/brain/.git" ]; then
+            $DRY_RUN_CMD ${pkgs.git}/bin/git clone git@github.com:RATIU5/nix-ai-brain.git "$HOME/brain" || \
+              echo "warning: could not clone nix-ai-brain vault (SSH key not set up yet?)"
+          fi
         '';
       };
   };
