@@ -56,6 +56,10 @@ with pkgs; [
   watchexec # Run a command on file change
   xh # Fast HTTP client (httpie-like)
 
+  # AI coding agents
+  # pi: overlaid from numtide/llm-agents.nix (latest release), not nixpkgs pin.
+  pi-coding-agent # pi CLI; config deferred to later
+
   # Language toolchains
   bun # JavaScript runtime / package manager
   go # Go

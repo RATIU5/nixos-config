@@ -53,8 +53,13 @@
       url = "github:shaunsingh/SFMono-Nerd-Font-Ligaturized";
       flake = false;
     };
+    # Daily-updated AI coding agents. Used for pi so we track current releases
+    # instead of the lagging nixpkgs pin
+    llm-agents = {
+      url = "github:numtide/llm-agents.nix";
+    };
   };
-  outputs = { self, darwin, nix-homebrew, brew-src, homebrew-bundle, homebrew-core, homebrew-cask, homebrew-bobrwm, homebrew-can1357, home-manager, nixpkgs, agenix, secrets, sf-mono-liga-src } @inputs:
+  outputs = { self, darwin, nix-homebrew, brew-src, homebrew-bundle, homebrew-core, homebrew-cask, homebrew-bobrwm, homebrew-can1357, home-manager, nixpkgs, agenix, secrets, sf-mono-liga-src, llm-agents } @inputs:
     let
       # All personal settings (name, email, machines) live in config.nix —
       # edit that one file to make this repo yours.

@@ -1,4 +1,5 @@
-# Edit/remove entries to taste. After editing, `chezmoi apply` triggers `mise install`.
+# Global mise tools. Linked to ~/.config/mise/config.toml; home-manager
+# activation runs `mise install` so these land on every machine.
 # Browse available tools: `mise registry` or https://mise.jdx.dev/registry.html
 
 [tools]
@@ -11,6 +12,7 @@ bat       = "latest"
 jq        = "latest"
 delta     = "latest"
 python    = "3.12"
+rust      = "stable"  # rustup-backed; puts cargo/rustc/rustfmt/clippy on ~/.cargo/bin
 
 [env]
 EDITOR = "helix"

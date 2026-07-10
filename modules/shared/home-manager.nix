@@ -18,8 +18,9 @@
     enableZshIntegration = true;
   };
 
-  # Fuzzy finder + completion engine. enableZshIntegration wires CTRL-T (files),
-  # CTRL-R (history), and ALT-C (cd), plus fuzzy tab-completion for cd/kill/ssh.
+  # Fuzzy finder + completion engine. enableZshIntegration wires CTRL-T (files)
+  # and ALT-C (cd), plus fuzzy tab-completion for cd/kill/ssh. CTRL-R is left
+  # to Atuin (historyWidget.command = "" so they don't fight).
   fzf = {
     enable = true;
     enableZshIntegration = true;
@@ -36,11 +37,15 @@
       "--color=selected-bg:#45475a"
       "--color=border:#6c7086,label:#cdd6f4"
     ];
-    fileWidgetCommand = "fd --type f --hidden --follow --exclude .git";
-    changeDirWidgetCommand = "fd --type d --hidden --follow --exclude .git";
-    fileWidgetOptions = [
-      "--preview 'bat --color=always --style=numbers --line-range=:500 {}'"
-    ];
+    fileWidget = {
+      command = "fd --type f --hidden --follow --exclude .git";
+      options = [
+        "--preview 'bat --color=always --style=numbers --line-range=:500 {}'"
+      ];
+    };
+    changeDirWidget.command = "fd --type d --hidden --follow --exclude .git";
+    # Atuin owns CTRL-R; empty command disables fzf's history binding.
+    historyWidget.command = "";
   };
 
   # SQLite-backed shell history with full-text CTRL-R search, scoped by
@@ -157,8 +162,10 @@
       export PYTHONPATH="$HOME/.local-pip/packages:$PYTHONPATH"
       export PATH="$HOME/.cache/.bun/bin:$PATH"
 
-      # PATH (migrated from dotfiles/config/shell/paths.sh)
-      export PATH="$HOME/.cargo/bin:/opt/homebrew/bin:$PATH"
+      # Rust toolchain (mise/rustup) installs cargo/rustc/rustfmt/clippy here.
+      # Keep ahead of system/nix paths so the active toolchain wins.
+      export PATH="$HOME/.cargo/bin:$PATH"
+      export PATH="/opt/homebrew/bin:$PATH"
       export PATH="$HOME/.opencode/bin:$PATH"
       export PATH="$HOME/.local/bin:$PATH"
       [ -d "$HOME/.cache/.bun/bin" ] && export PATH="$HOME/.cache/.bun/bin:$PATH"
@@ -253,8 +260,14 @@
           esac
       }
 
-      # Auto-start tmux on new interactive terminal if not already inside one
-      if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
+      # Auto-start tmux only in a real interactive TTY. GUI env capture
+      # (Zed, etc.) is non-TTY / non-interactive and must not hit exec.
+      if command -v tmux &>/dev/null \
+        && [[ -o interactive ]] \
+        && [[ -t 0 ]] \
+        && [[ ! "$TERM" =~ screen ]] \
+        && [[ ! "$TERM" =~ tmux ]] \
+        && [[ -z "$TMUX" ]]; then
         exec tmux
       fi
     '';

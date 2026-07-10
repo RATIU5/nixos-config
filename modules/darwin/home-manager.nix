@@ -55,6 +55,9 @@
         home = {
           enableNixpkgsReleaseCheck = false;
           packages = pkgs.callPackage ./packages.nix {};
+          # GUI apps (Zed) capture env from login shells / session vars.
+          # Put cargo on PATH outside interactive zshrc so non-TTY capture works.
+          sessionPath = [ "$HOME/.cargo/bin" ];
           # Ensure the screenshot target dir exists (system.defaults.screencapture.location).
           file."Pictures/Screenshots/.keep".text = "";
           # Ghostty is a Homebrew cask, which only ships the `ghostty` binary
@@ -62,6 +65,11 @@
           # so the CLI (`ghostty +list-themes`, etc.) works like the old nix build.
           file.".local/bin/ghostty".source =
             config.lib.file.mkOutOfStoreSymlink "/Applications/Ghostty.app/Contents/MacOS/ghostty";
+          # Login-shell / sh capture path for cargo (complements sessionPath + zshrc).
+          # Conditional: rustup creates ~/.cargo/env; skip until toolchain exists.
+          file.".profile".text = ''
+            [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
+          '';
           stateVersion = "23.11";
         };
         # Auto-link every entry in dotfiles/config/ -> ~/.config/<entry>. Drop a
@@ -91,6 +99,15 @@
         home.activation.buildOls = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
           $DRY_RUN_CMD ${pkgs.writeShellScript "build-ols"
             (builtins.readFile ./scripts/build-ols.sh)}
+        '';
+        # Install mise tools declared in dotfiles/config/mise/config.toml
+        # (linked to ~/.config/mise/). Includes the rust toolchain (stable via
+        # rustup). Idempotent: already-installed versions are no-ops. Network
+        # required on first run; failure is non-fatal so offline switches still
+        # succeed.
+        home.activation.miseInstall = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          $DRY_RUN_CMD ${pkgs.mise}/bin/mise install || \
+            echo "warning: mise install failed (offline? network?)"
         '';
         # Second-brain Obsidian vault: clone the private repo to ~/brain on
         # first activation (no-op when it already exists). Content lives in
