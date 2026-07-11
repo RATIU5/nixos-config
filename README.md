@@ -20,6 +20,7 @@ flake.nix             # inputs + outputs (set your secrets repo URL here)
 modules/shared/       # cross-machine: packages, home-manager
 modules/darwin/       # macOS: casks, dock, secrets
 dotfiles/config/      # tool configs (auto-linked to ~/.config/)
+dotfiles/pi/          # pi coding-agent config (synced to ~/.pi on activation)
 ```
 
 ## What's inside
@@ -47,6 +48,7 @@ dotfiles/config/      # tool configs (auto-linked to ~/.config/)
 | `gh`            | GitHub CLI                        |
 | `gitleaks`      | Secret scanner                    |
 | `glow`          | Terminal markdown renderer        |
+| `herdr`         | Agent multiplexer (via mise)      |
 | `iftop`         | Network bandwidth monitor         |
 | `jq`            | JSON processor                    |
 | `lazygit`       | Git TUI                           |
@@ -56,6 +58,7 @@ dotfiles/config/      # tool configs (auto-linked to ~/.config/)
 | `mkcert`        | Local HTTPS certs                 |
 | `ngrok`         | Secure tunnels                    |
 | `pandoc`        | Document converter                |
+| `pi`            | AI coding agent (earendil-works)  |
 | `ripgrep`       | Fast text search                  |
 | `sd`            | Intuitive find/replace            |
 | `sesh`          | tmux session manager              |
@@ -134,6 +137,58 @@ dotfiles/config/      # tool configs (auto-linked to ~/.config/)
 \*all = `work` and `personal`. The `vm` profile installs no casks.
 
 </details>
+
+## pi coding agent
+
+[`pi`](https://github.com/earendil-works/pi) (earendil-works) is installed as `pi-coding-agent` from [numtide/llm-agents.nix](https://github.com/numtide/llm-agents.nix) and configured from `dotfiles/pi/`.
+
+**The pieces**
+
+| Piece | Where | Managed by |
+| ----- | ----- | ---------- |
+| `pi` CLI | `modules/shared/packages.nix` (`pi-coding-agent`) | Nix |
+| Settings / cloak / MCP / theme | `dotfiles/pi/agent/` → `~/.pi/agent/` | `home.activation.syncPiConfig` |
+| Extensions workspace | `dotfiles/pi/agent/extensions/` → `~/.pi/agent/extensions/` | same activation + `bun install` |
+| Herdr ↔ pi bridge | `~/.pi/agent/extensions/herdr-agent-state.ts` | `herdr integration install pi` (after mise + pi sync) |
+| Runtime state | `~/.pi/agent/auth.json`, sessions | not managed (left alone) |
+
+**Extensions shipped**
+
+- Standalone: `answer`, `git-interceptor`, `whimsical`, `worker-configuration-guard`, `contextio-proxy`
+- Packages: `pi-cloak`, `pi-skill-toggle`, `save-md`, `web-tools` (Exa; set `EXA_API_KEY`)
+- External: `herdr-agent-state` (installed by Herdr; preserved across pi sync)
+
+Skipped from the reference tree: `opencode-cloudflare`, personal MCP endpoints.
+
+**ContextIO (automatic LLM redaction + logging)**
+
+[`@contextio/cli`](https://github.com/larsderidder/contextio) is installed into `~/.npm-packages` and a background proxy is started on activation. The `contextio-proxy` extension rewrites anthropic/openai/google/**xai** baseUrls so pi traffic always goes through it (pi ignores `*_BASE_URL` env vars). xAI uses OpenAI-compat paths plus `x-target-url` → `api.x.ai`.
+
+| Piece | Where | Managed by |
+| ----- | ----- | ---------- |
+| `ctxio` CLI | `~/.npm-packages` (`@contextio/cli`) | `home.activation.installContextio` |
+| Background proxy | `127.0.0.1:4040` (redact preset `pii`) | `home.activation.ensureContextioProxy` + zsh `pi()` wrapper |
+| Provider routing | `dotfiles/pi/agent/extensions/contextio-proxy.ts` | `syncPiConfig` |
+| Captures | `~/.contextio/captures/` | contextio |
+
+```bash
+pi                        # ensures proxy is up (zsh wrapper), then launches
+ctxio proxy status
+ctxio monitor
+ctxio inspect --last
+CONTEXTIO_DISABLED=1 pi   # bypass
+```
+
+**After `build-switch`**
+
+```bash
+cd ~/.pi && bun install   # first time / after package.json changes (activation also tries this)
+herdr integration status  # confirm pi integration is installed
+ctxio proxy status        # confirm contextio is running
+pi                        # then /reload after extension edits
+```
+
+Edit config under `dotfiles/pi/`, commit, re-run `nix run .#build-switch`.
 
 ## AI second brain (omp + Obsidian)
 

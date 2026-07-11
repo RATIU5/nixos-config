@@ -1,0 +1,19 @@
+{
+  "mcp": {
+    "toolMode": "proxy",
+    "startup": "lazy",
+    "servers": {
+      "cf-portal": {
+        "type": "remote",
+        "url": "https://portal.mcp.cfdata.org/mcp?codemode=search_and_execute",
+        "oauth": {}
+      },
+      "open-computer-use": {
+        "type": "local",
+        "command": ["open-computer-use", "mcp"],
+        "enabled": true,
+        "timeout": 60000
+      }
+    }
+  }
+}

@@ -184,6 +184,38 @@
         eval "$(mise activate zsh)"
       fi
 
+      # contextio: local LLM proxy (log + redact). Ensures the background
+      # proxy is up, then runs the real pi. Bypass with CONTEXTIO_DISABLED=1
+      # or `command pi`. Proxy itself: ctxio proxy status|stop|monitor.
+      # NOTE: do not use `ctxio proxy -d` — v0.3.0 drops --redact flags.
+      ensure-contextio() {
+        if command -v ensure-contextio-proxy >/dev/null 2>&1; then
+          ensure-contextio-proxy >/dev/null 2>&1 || true
+        elif command -v ctxio >/dev/null 2>&1; then
+          # Fallback: start with full flags via node entry (same as helper).
+          if ! ctxio proxy status 2>/dev/null | grep -Eqi 'running \(pid'; then
+            local entry
+            entry="$(node -e "try{const{createRequire}=require('module');const p=require('path');const r=createRequire(p.join(process.env.HOME,'.npm-packages/lib/node_modules/@contextio/cli/package.json'));console.log(r.resolve('./dist/main.js'))}catch{}" 2>/dev/null)"
+            if [[ -n "$entry" ]]; then
+              local preset="''${CONTEXTIO_REDACT_PRESET:-pii}"
+              local max="''${CONTEXTIO_LOG_MAX_SESSIONS:-50}"
+              mkdir -p "$HOME/.contextio"
+              # Allow x-target-url (used by xAI routing) from localhost only.
+              CONTEXT_PROXY_ALLOW_TARGET_OVERRIDE=1 \
+                nohup node "$entry" proxy --port 4040 --log-max-sessions "$max" --redact --redact-preset "$preset" \
+                >>"$HOME/.contextio/proxy.log" 2>&1 &
+              echo "{\"pid\":$!,\"port\":4040,\"startedAt\":\"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\"}" >"$HOME/.contextio/background.json"
+            fi
+          fi
+        fi
+      }
+      pi() {
+        if [[ "''${CONTEXTIO_DISABLED:-0}" != "1" ]]; then
+          ensure-contextio
+        fi
+        command pi "$@"
+      }
+
       # lazydocker against the podman machine. Resolve DOCKER_HOST on demand so
       # we don't pay `podman machine inspect` on every shell startup.
       lazydocker() {

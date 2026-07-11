@@ -13,6 +13,10 @@ jq        = "latest"
 delta     = "latest"
 python    = "3.12"
 rust      = "stable"  # rustup-backed; puts cargo/rustc/rustfmt/clippy on ~/.cargo/bin
+# herdr: agent multiplexer. Installed via mise (aqua/github backend) rather
+# than Homebrew — nix-homebrew currently chokes loading some core formulas.
+# Pi bridge is installed by home.activation.installHerdrIntegrations.
+herdr     = "latest"
 
 [env]
 EDITOR = "helix"

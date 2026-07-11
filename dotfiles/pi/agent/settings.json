@@ -1,0 +1,8 @@
+{
+  "defaultThinkingLevel": "high",
+  "theme": "catppuccin-macchiato",
+  "packages": [
+    "npm:pi-extmgr",
+    "npm:@plannotator/pi-extension"
+  ]
+}

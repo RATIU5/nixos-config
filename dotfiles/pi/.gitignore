@@ -1,0 +1,29 @@
+# dependencies
+node_modules
+package-lock.json
+
+# output
+out
+dist
+*.tgz
+
+# coverage
+coverage
+*.lcov
+
+# logs
+logs
+*.log
+
+# env
+.env
+.env.*
+
+# caches
+.eslintcache
+.cache
+*.tsbuildinfo
+
+# OS / IDE
+.idea
+.DS_Store

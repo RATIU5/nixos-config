@@ -118,6 +118,45 @@
               echo "warning: could not clone nix-ai-brain vault (SSH key not set up yet?)"
           fi
         '';
+        # Sync pi (earendil-works) agent config from dotfiles/pi into ~/.pi.
+        # Writable copies so `bun install` and runtime state (auth, sessions)
+        # can live alongside managed files. Skips personal MCP endpoints and
+        # the opencode-cloudflare extension from the reference tree.
+        # herdr-agent-state.ts is owned by `herdr integration install pi` and
+        # is preserved by the sync script.
+        # ${../../dotfiles/pi} is a path literal so Nix copies it into the store
+        # and the activation script always sees a frozen snapshot.
+        home.activation.syncPiConfig =
+          let
+            # Path literal coerced into a string → copied into the Nix store.
+            piSrc = "${../../dotfiles/pi}";
+            syncScript = pkgs.writeShellScript "sync-pi-config"
+              (builtins.replaceStrings [ "@piSrc@" ] [ piSrc ]
+                (builtins.readFile ./scripts/sync-pi-config.sh));
+          in
+          lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+            export PATH="${lib.getBin pkgs.bun}/bin:${lib.getBin pkgs.coreutils}/bin:$PATH"
+            $DRY_RUN_CMD ${syncScript}
+          '';
+        # Install Herdr's Pi lifecycle/session integration after the pi tree
+        # is synced (extensions dir must exist) and mise has had a chance to
+        # install the herdr binary. Re-runs on every switch so a herdr upgrade
+        # refreshes the bundled extension.
+        home.activation.installHerdrIntegrations = lib.hm.dag.entryAfter [ "syncPiConfig" "miseInstall" ] ''
+          $DRY_RUN_CMD ${pkgs.writeShellScript "install-herdr-integrations"
+            (builtins.readFile ./scripts/install-herdr-integrations.sh)}
+        '';
+        # Install @contextio/cli (LLM API proxy with redaction) into
+        # ~/.npm-packages, then ensure a background proxy is running so pi
+        # (via contextio-proxy.ts) can route anthropic/openai/google through it.
+        home.activation.installContextio = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          $DRY_RUN_CMD ${pkgs.writeShellScript "install-contextio"
+            (builtins.readFile ./scripts/install-contextio.sh)}
+        '';
+        home.activation.ensureContextioProxy = lib.hm.dag.entryAfter [ "installContextio" ] ''
+          $DRY_RUN_CMD ${pkgs.writeShellScript "ensure-contextio-proxy"
+            (builtins.readFile ./scripts/ensure-contextio-proxy.sh)}
+        '';
       };
   };
 }

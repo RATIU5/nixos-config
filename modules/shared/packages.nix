@@ -58,7 +58,8 @@ with pkgs; [
 
   # AI coding agents
   # pi: overlaid from numtide/llm-agents.nix (latest release), not nixpkgs pin.
-  pi-coding-agent # pi CLI; config deferred to later
+  # Config lives in dotfiles/pi and is synced to ~/.pi by home.activation.syncPiConfig.
+  pi-coding-agent # pi CLI
 
   # Language toolchains
   bun # JavaScript runtime / package manager
