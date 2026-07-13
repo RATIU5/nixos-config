@@ -224,9 +224,9 @@ term = xterm-ghostty
 # (Claude Code, opencode, codex, REPLs).
 #
 # We emit the kitty/CSI-u encoding for Shift+Enter (ESC[13;2u) rather than a
-# raw line feed. A raw `\n` is byte-identical to Ctrl+J, which vim-tmux-navigator
-# binds (root table) to "select pane below" — so inside tmux Shift+Enter would
-# move panes instead of inserting a newline. The CSI-u sequence is a distinct
-# key that tmux forwards (extended-keys-format csi-u) and apps decode as
-# Shift+Enter, leaving Ctrl+J pane navigation intact.
+# raw line feed. A raw `\n` is byte-identical to Ctrl+J, which many pane
+# navigators bind to "select pane below" — so inside a multiplexer Shift+Enter
+# would move panes instead of inserting a newline. The CSI-u sequence is a
+# distinct key that multiplexers forward and apps decode as Shift+Enter,
+# leaving Ctrl+J navigation intact.
 keybind = shift+enter=csi:13;2u

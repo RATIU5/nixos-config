@@ -40,7 +40,7 @@ with pkgs; [
   pandoc # Document converter
   ripgrep # Fast text search tool
   # starship is installed via programs.starship in home-manager.nix
-  tmux # Terminal multiplexer
+  # tmux/sesh removed: herdr is the terminal workspace (mise + auto-start).
   tree # Directory tree viewer
   unzip # ZIP archive extractor
   uv # Python package installer
@@ -49,7 +49,6 @@ with pkgs; [
   # zoxide is installed via programs.zoxide in home-manager.nix
 
   # Workflow / dev TUIs
-  sesh # tmux session manager (fzf + zoxide-aware project jumper)
   lazydocker # Container TUI (works with podman via DOCKER_HOST)
   ast-grep # Structural code search/refactor (`sg`)
   sd # Intuitive find/replace (sed without the line-noise)

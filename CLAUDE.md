@@ -60,7 +60,7 @@ statix check
 
 3. **Secrets Management**: Uses `agenix` for encrypted secrets, defined in `modules/darwin/secrets.nix` (sourced from the private `secrets` flake input).
 
-4. **Home Manager Integration**: User-level configuration lives in `modules/shared/home-manager.nix` (shell, git, editor, tmux) and `modules/darwin/home-manager.nix` (dock, macOS home-manager wiring).
+4. **Home Manager Integration**: User-level configuration lives in `modules/shared/home-manager.nix` (shell, git, editor, herdr auto-start) and `modules/darwin/home-manager.nix` (dock, macOS home-manager wiring).
 
 ### Important Configuration Files
 

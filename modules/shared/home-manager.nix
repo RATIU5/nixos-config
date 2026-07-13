@@ -302,15 +302,22 @@
           esac
       }
 
-      # Auto-start tmux only in a real interactive TTY. GUI env capture
-      # (Zed, etc.) is non-TTY / non-interactive and must not hit exec.
-      if command -v tmux &>/dev/null \
+      # Auto-start herdr only in a real interactive TTY (regular terminal
+      # windows: Ghostty, Terminal.app, iTerm, …). Skip IDE-embedded terminals,
+      # non-TTY GUI env capture (Zed, etc.), and anything already inside herdr.
+      if command -v herdr &>/dev/null \
         && [[ -o interactive ]] \
         && [[ -t 0 ]] \
+        && [[ -z "''${HERDR_ENV:-}" ]] \
+        && [[ -z "''${HERDR_PANE_ID:-}" ]] \
+        && [[ -z "''${TMUX:-}" ]] \
         && [[ ! "$TERM" =~ screen ]] \
         && [[ ! "$TERM" =~ tmux ]] \
-        && [[ -z "$TMUX" ]]; then
-        exec tmux
+        && [[ "''${TERM_PROGRAM:-}" != "vscode" ]] \
+        && [[ "''${TERM_PROGRAM:-}" != "cursor" ]] \
+        && [[ -z "''${VSCODE_INJECTION:-}" ]] \
+        && [[ -z "''${INSIDE_EMACS:-}" ]]; then
+        exec herdr
       fi
     '';
   };
@@ -351,7 +358,7 @@
 
   vim = {
     enable = true;
-    plugins = with pkgs.vimPlugins; [ vim-airline vim-airline-themes vim-tmux-navigator ];
+    plugins = with pkgs.vimPlugins; [ vim-airline vim-airline-themes ];
     settings = { ignorecase = true; };
     extraConfig = ''
       "" General
@@ -481,57 +488,4 @@
     };
   };
 
-  tmux = {
-    enable = true;
-    shell = "${pkgs.zsh}/bin/zsh";
-    sensibleOnTop = false;
-    plugins = with pkgs.tmuxPlugins; [
-      vim-tmux-navigator
-      sensible  # Re-enabled with workaround below
-      yank
-      prefix-highlight
-      {
-        plugin = power-theme;
-        # tmux-power's theme accepts a custom accent color (hex) instead of a
-        # named theme. Using a Catppuccin Mocha accent keeps the powerline look
-        # but recolors it. Swap the hex for another Catppuccin accent, e.g.
-        # mauve '#cba6f7', blue '#89b4fa', green '#a6e3a1', red '#f38ba8'.
-        # (Segment background grays are tmux-power's own and aren't configurable.)
-        extraConfig = ''
-           set -g @tmux_power_theme '#fab387'
-        '';
-      }
-      {
-        plugin = resurrect; # Used by tmux-continuum
-
-        # Use XDG data directory
-        # https://github.com/tmux-plugins/tmux-resurrect/issues/348
-        extraConfig = ''
-          set -g @resurrect-dir '${config.home.homeDirectory}/.cache/tmux/resurrect'
-          set -g @resurrect-capture-pane-contents 'on'
-          set -g @resurrect-pane-contents-area 'visible'
-        '';
-      }
-      {
-        plugin = continuum;
-        extraConfig = ''
-          set -g @continuum-restore 'on'
-          set -g @continuum-save-interval '5' # minutes
-        '';
-      }
-    ];
-    terminal = "tmux-256color";
-    prefix = "C-s";
-    escapeTime = 10;
-    historyLimit = 50000;
-    # All hand-written settings, bindings, and theming live in
-    # dotfiles/config/tmux/tmux.conf (the editable source of truth). This block
-    # only manages plugins; home-manager appends their `run-shell` lines AFTER
-    # this extraConfig, so plugin bindings (e.g. vim-tmux-navigator's C-hjkl)
-    # take effect on top of the sourced config. See modules/darwin/home-manager.nix
-    # for why tmux is excluded from the dotfiles auto-linker.
-    extraConfig = ''
-      source-file ${../../dotfiles/config/tmux/tmux.conf}
-      '';
-    };
 }

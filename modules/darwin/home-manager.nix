@@ -83,15 +83,11 @@
         # auto-linker uses recursive = true, ~/.config/gh is a real directory, so
         # gh creates and owns hosts.yml itself on first login. The static
         # settings in dotfiles/config/gh/config.yml are still linked below.
-        #
-        # tmux is intentionally EXCLUDED: home-manager's `programs.tmux` already
-        # generates ~/.config/tmux/tmux.conf (so plugins load via run-shell). It
-        # sources dotfiles/config/tmux/tmux.conf for all hand-written settings, so
-        # that file stays the editable source of truth without colliding with the
-        # generated config.
+        # Auto-link every top-level entry under dotfiles/config/ into ~/.config/.
+        # herdr config lives at dotfiles/config/herdr/config.toml.
         xdg.configFile = builtins.mapAttrs
           (name: _: { source = ../../dotfiles/config + "/${name}"; recursive = true; })
-          (builtins.removeAttrs (builtins.readDir ../../dotfiles/config) [ "tmux" ]);
+          (builtins.readDir ../../dotfiles/config);
         programs = {} // import ../shared/home-manager.nix { inherit config pkgs lib user fullName email; };
         manual.manpages.enable = false;
         # Clone and compile OLS from source against the Homebrew odin on each

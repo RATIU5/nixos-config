@@ -1,0 +1,19 @@
+# herdr configuration (source of truth → ~/.config/herdr/config.toml)
+# Linked by home-manager xdg.configFile from dotfiles/config/herdr/.
+#
+# Prefix is Ctrl+S (same as our old tmux setup). Default is ctrl+b.
+# Docs: https://herdr.dev/docs/configuration/#keybindings
+
+# Skip first-run onboarding after declarative setup.
+onboarding = false
+
+[theme]
+name = "catppuccin"
+
+[terminal]
+# Login shells on macOS so PATH (Homebrew, mise, cargo, …) is fully wired.
+shell_mode = "auto"
+
+[keys]
+# Rebind the prefix from the default ctrl+b → ctrl+s.
+prefix = "ctrl+s"

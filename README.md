@@ -9,7 +9,7 @@ Reproducible **Apple Silicon macOS** setup using [nix-darwin](https://github.com
 - [Helix](https://helix-editor.com) pre-wired for ~25 languages (LSPs + formatters) via [mise](https://mise.jdx.dev)
 - Encrypted secrets via [agenix](https://github.com/ryantm/agenix) — one passphraseless key per machine
 - Second-brain Obsidian vault at `~/brain`, auto-cloned on activation from the private [`nix-ai-brain`](https://github.com/RATIU5/nix-ai-brain) repo (content lives in git, not Nix)
-- Catppuccin Mocha across Ghostty, Helix, Yazi, tmux, fzf, and starship
+- Catppuccin Mocha across Ghostty, Helix, Yazi, herdr, fzf, and starship
 
 ## Layout
 
@@ -48,7 +48,7 @@ dotfiles/pi/          # pi coding-agent config (synced to ~/.pi on activation)
 | `gh`            | GitHub CLI                        |
 | `gitleaks`      | Secret scanner                    |
 | `glow`          | Terminal markdown renderer        |
-| `herdr`         | Agent multiplexer (via mise)      |
+| `herdr`         | Agent multiplexer (via mise; replaces tmux) |
 | `iftop`         | Network bandwidth monitor         |
 | `jq`            | JSON processor                    |
 | `lazygit`       | Git TUI                           |
@@ -61,9 +61,7 @@ dotfiles/pi/          # pi coding-agent config (synced to ~/.pi on activation)
 | `pi`            | AI coding agent (earendil-works)  |
 | `ripgrep`       | Fast text search                  |
 | `sd`            | Intuitive find/replace            |
-| `sesh`          | tmux session manager              |
 | `ast-grep`      | Structural code search/refactor   |
-| `tmux`          | Terminal multiplexer              |
 | `tree`          | Directory tree                    |
 | `uv`            | Python package installer          |
 | `watchexec`     | Run command on file change        |
