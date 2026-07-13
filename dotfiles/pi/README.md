@@ -45,6 +45,8 @@ Skipped from the upstream reference config:
 Installed separately (not tracked in this tree):
 
 - `herdr-agent-state.ts` — via `herdr integration install pi` on activation
+- OpenSpec skills/prompts — via `home.activation.installOpenSpec` into
+  `~/.pi/agent/{skills,prompts}` (not under `dotfiles/pi/`)
 
 ## ContextIO
 
@@ -62,6 +64,38 @@ ctxio inspect --last
 CONTEXTIO_DISABLED=1 pi   # bypass
 ```
 
+## OpenSpec (spec-driven workflows for pi)
+
+[`@fission-ai/openspec`](https://github.com/Fission-AI/OpenSpec) is installed
+globally and the **pi** tool adapter is seeded into `~/.pi/agent/` on activation
+([supported tools](https://github.com/Fission-AI/OpenSpec/blob/main/docs/supported-tools.md)):
+
+| Artifact | Global path | Pi discovery |
+| -------- | ----------- | ------------ |
+| Skills | `~/.pi/agent/skills/openspec-*/SKILL.md` | auto |
+| Prompt commands | `~/.pi/agent/prompts/opsx-*.md` | `/opsx-propose`, `/opsx-apply`, … |
+| CLI | `openspec` in `~/.cache/.bun/bin` | project `openspec/` via `openspec init` |
+
+Core profile: `propose`, `explore`, `apply`, `sync`, `archive` (+ `update`).
+
+```bash
+# first time in a project (creates openspec/specs + changes)
+cd your-project && openspec init --tools pi --profile core
+
+# inside pi
+/opsx-explore
+/opsx-propose add-dark-mode
+/opsx-apply
+/opsx-archive
+
+# or skill form
+/skill:openspec-propose
+
+# refresh global pi artifacts after upgrading openspec
+# (also happens on every build-switch)
+bash modules/darwin/scripts/install-openspec.sh
+```
+
 ## After switch
 
 ```bash
@@ -77,4 +111,6 @@ pi  # then /reload
 ```bash
 cd ~/.pi && bun run check
 ctxio doctor
+openspec --version
+ls ~/.pi/agent/skills/openspec-* ~/.pi/agent/prompts/opsx-*.md
 ```

@@ -6,7 +6,7 @@
 # full arg list and write background.json so `ctxio proxy status|stop` still work.
 set -euo pipefail
 
-export PATH="${HOME}/.npm-packages/bin:${HOME}/.local/share/mise/shims:${HOME}/.local/bin:/opt/homebrew/bin:/usr/bin:/bin:$PATH"
+export PATH="${HOME}/.cache/.bun/bin:${HOME}/.npm-packages/bin:${HOME}/.local/share/mise/shims:${HOME}/.local/bin:/opt/homebrew/bin:/usr/bin:/bin:$PATH"
 
 STATE_DIR="${HOME}/.contextio"
 BG_JSON="${STATE_DIR}/background.json"
@@ -24,27 +24,25 @@ if ! command -v ctxio >/dev/null 2>&1; then
   exit 0
 fi
 
-# Resolve CLI entry (npm bin → package dist/main.js)
+# Resolve CLI entry (bun global bin links straight at dist/main.js).
 CLI_ENTRY=""
-if command -v node >/dev/null 2>&1; then
-  CLI_ENTRY="$(node -e "
-    try {
-      const { createRequire } = require('module');
-      const path = require('path');
-      const req = createRequire(path.join(process.env.HOME, '.npm-packages/lib/node_modules/@contextio/cli/package.json'));
-      console.log(req.resolve('./dist/main.js'));
-    } catch (e) {
-      process.exit(1);
-    }
-  " 2>/dev/null || true)"
+if command -v ctxio >/dev/null 2>&1; then
+  candidate="$(command -v ctxio)"
+  # bun: symlink → package dist/main.js; npm: wrapper script that requires dist
+  if [[ -f "$candidate" ]]; then
+    CLI_ENTRY="$candidate"
+  fi
 fi
 if [[ -z "$CLI_ENTRY" || ! -f "$CLI_ENTRY" ]]; then
-  # Fallback: walk from `which ctxio`
-  CTXIO_BIN="$(command -v ctxio)"
-  CANDIDATE="$(cd "$(dirname "$CTXIO_BIN")/.." && pwd)/lib/node_modules/@contextio/cli/dist/main.js"
-  if [[ -f "$CANDIDATE" ]]; then
-    CLI_ENTRY="$CANDIDATE"
-  fi
+  for candidate in \
+    "${HOME}/.cache/.bun/install/global/node_modules/@contextio/cli/dist/main.js" \
+    "${HOME}/.npm-packages/lib/node_modules/@contextio/cli/dist/main.js"
+  do
+    if [[ -f "$candidate" ]]; then
+      CLI_ENTRY="$candidate"
+      break
+    fi
+  done
 fi
 if [[ -z "$CLI_ENTRY" || ! -f "$CLI_ENTRY" ]]; then
   echo "[contextio] could not resolve @contextio/cli entrypoint — skipping" >&2

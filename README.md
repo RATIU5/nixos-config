@@ -162,11 +162,11 @@ Skipped from the reference tree: `opencode-cloudflare`, personal MCP endpoints.
 
 **ContextIO (automatic LLM redaction + logging)**
 
-[`@contextio/cli`](https://github.com/larsderidder/contextio) is installed into `~/.npm-packages` and a background proxy is started on activation. The `contextio-proxy` extension rewrites anthropic/openai/google/**xai** baseUrls so pi traffic always goes through it (pi ignores `*_BASE_URL` env vars). xAI uses OpenAI-compat paths plus `x-target-url` → `api.x.ai`.
+[`@contextio/cli`](https://github.com/larsderidder/contextio) is installed with `bun install -g` (bins under `~/.cache/.bun/bin`) and a background proxy is started on activation. The `contextio-proxy` extension rewrites anthropic/openai/google/**xai** baseUrls so pi traffic always goes through it (pi ignores `*_BASE_URL` env vars). xAI uses OpenAI-compat paths plus `x-target-url` → `api.x.ai`.
 
 | Piece | Where | Managed by |
 | ----- | ----- | ---------- |
-| `ctxio` CLI | `~/.npm-packages` (`@contextio/cli`) | `home.activation.installContextio` |
+| `ctxio` CLI | `~/.cache/.bun/bin` (`bun install -g @contextio/cli`) | `home.activation.installContextio` |
 | Background proxy | `127.0.0.1:4040` (redact preset `pii`) | `home.activation.ensureContextioProxy` + zsh `pi()` wrapper |
 | Provider routing | `dotfiles/pi/agent/extensions/contextio-proxy.ts` | `syncPiConfig` |
 | Captures | `~/.contextio/captures/` | contextio |
@@ -179,12 +179,31 @@ ctxio inspect --last
 CONTEXTIO_DISABLED=1 pi   # bypass
 ```
 
+**OpenSpec (spec-driven workflows for pi)**
+
+[`@fission-ai/openspec`](https://github.com/Fission-AI/OpenSpec) CLI is installed with `bun install -g`. Activation also seeds the **pi** tool adapter into global pi dirs so slash commands work without a per-project init ([tool map](https://github.com/Fission-AI/OpenSpec/blob/main/docs/supported-tools.md)):
+
+| Piece | Where | Managed by |
+| ----- | ----- | ---------- |
+| `openspec` CLI | `~/.cache/.bun/bin` (`bun install -g @fission-ai/openspec`) | `home.activation.installOpenSpec` |
+| Skills | `~/.pi/agent/skills/openspec-*/` | same (from `openspec init --tools pi`) |
+| Prompt commands | `~/.pi/agent/prompts/opsx-*.md` | same (`/opsx-propose`, `/opsx-apply`, …) |
+| Project specs | `openspec/` in each repo | `openspec init --tools pi` (per project) |
+
+```bash
+cd your-project && openspec init --tools pi --profile core
+pi
+# then: /opsx-propose "…"  /opsx-apply  /opsx-archive
+```
+
 **After `build-switch`**
 
 ```bash
 cd ~/.pi && bun install   # first time / after package.json changes (activation also tries this)
 herdr integration status  # confirm pi integration is installed
 ctxio proxy status        # confirm contextio is running
+openspec --version        # confirm OpenSpec CLI
+ls ~/.pi/agent/prompts/opsx-*.md
 pi                        # then /reload after extension edits
 ```
 

@@ -154,12 +154,14 @@
 
       # Define PATH variables
       export PATH=$HOME/.pnpm-packages/bin:$HOME/.pnpm-packages:$PATH
+      # Legacy npm global prefix (kept for any older tools).
       export PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
       export PATH=$HOME/.composer/vendor/bin:$PATH
       export PATH=$HOME/.local/share/bin:$PATH
       export PATH=$HOME/.local/share/src/conductly/bin:$PATH
       export PATH=$HOME/.local/share/src/conductly/utils:$PATH
       export PYTHONPATH="$HOME/.local-pip/packages:$PYTHONPATH"
+      # bun global CLIs (ctxio, openspec, …) — prefer over ~/.npm-packages
       export PATH="$HOME/.cache/.bun/bin:$PATH"
 
       # Rust toolchain (mise/rustup) installs cargo/rustc/rustfmt/clippy here.
@@ -195,8 +197,16 @@
           # Fallback: start with full flags via node entry (same as helper).
           if ! ctxio proxy status 2>/dev/null | grep -Eqi 'running \(pid'; then
             local entry
-            entry="$(node -e "try{const{createRequire}=require('module');const p=require('path');const r=createRequire(p.join(process.env.HOME,'.npm-packages/lib/node_modules/@contextio/cli/package.json'));console.log(r.resolve('./dist/main.js'))}catch{}" 2>/dev/null)"
-            if [[ -n "$entry" ]]; then
+            entry="$(command -v ctxio 2>/dev/null || true)"
+            if [[ -z "$entry" || ! -f "$entry" ]]; then
+              for candidate in \
+                "$HOME/.cache/.bun/install/global/node_modules/@contextio/cli/dist/main.js" \
+                "$HOME/.npm-packages/lib/node_modules/@contextio/cli/dist/main.js"
+              do
+                [[ -f "$candidate" ]] && entry="$candidate" && break
+              done
+            fi
+            if [[ -n "$entry" && -f "$entry" ]]; then
               local preset="''${CONTEXTIO_REDACT_PRESET:-pii}"
               local max="''${CONTEXTIO_LOG_MAX_SESSIONS:-50}"
               mkdir -p "$HOME/.contextio"

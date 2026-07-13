@@ -146,9 +146,9 @@
           $DRY_RUN_CMD ${pkgs.writeShellScript "install-herdr-integrations"
             (builtins.readFile ./scripts/install-herdr-integrations.sh)}
         '';
-        # Install @contextio/cli (LLM API proxy with redaction) into
-        # ~/.npm-packages, then ensure a background proxy is running so pi
-        # (via contextio-proxy.ts) can route anthropic/openai/google through it.
+        # Install @contextio/cli (LLM API proxy with redaction) via bun -g,
+        # then ensure a background proxy is running so pi (via contextio-proxy.ts)
+        # can route anthropic/openai/google/xai through it.
         home.activation.installContextio = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
           $DRY_RUN_CMD ${pkgs.writeShellScript "install-contextio"
             (builtins.readFile ./scripts/install-contextio.sh)}
@@ -156,6 +156,13 @@
         home.activation.ensureContextioProxy = lib.hm.dag.entryAfter [ "installContextio" ] ''
           $DRY_RUN_CMD ${pkgs.writeShellScript "ensure-contextio-proxy"
             (builtins.readFile ./scripts/ensure-contextio-proxy.sh)}
+        '';
+        # Install OpenSpec CLI via bun -g and seed global pi skills/prompts
+        # (~/.pi/agent/{skills,prompts}) so /opsx-* works without per-project
+        # init. Project-local `openspec init --tools pi` still creates openspec/.
+        home.activation.installOpenSpec = lib.hm.dag.entryAfter [ "syncPiConfig" ] ''
+          $DRY_RUN_CMD ${pkgs.writeShellScript "install-openspec"
+            (builtins.readFile ./scripts/install-openspec.sh)}
         '';
       };
   };

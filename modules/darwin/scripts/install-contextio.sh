@@ -1,31 +1,28 @@
 #!/usr/bin/env bash
-# Install @contextio/cli into ~/.npm-packages (already on PATH via home-manager).
-# Idempotent: re-runs `npm install -g` which is a no-op when already current.
+# Install @contextio/cli globally with bun (bins under ~/.cache/.bun/bin,
+# already on PATH via home-manager). Idempotent.
 set -euo pipefail
 
-export PATH="/opt/homebrew/bin:${HOME}/.local/share/mise/shims:${HOME}/.local/bin:/usr/bin:/bin:$PATH"
+export PATH="/opt/homebrew/bin:${HOME}/.local/share/mise/shims:${HOME}/.cache/.bun/bin:${HOME}/.local/bin:/usr/bin:/bin:$PATH"
 
-NPM_PREFIX="${HOME}/.npm-packages"
-mkdir -p "$NPM_PREFIX"
-
-if ! command -v npm >/dev/null 2>&1; then
-  echo "[contextio] npm not found — skipping install" >&2
+if ! command -v bun >/dev/null 2>&1; then
+  echo "[contextio] bun not found — skipping install" >&2
   exit 0
 fi
 
 # Pin version so activation is reproducible across machines.
 CONTEXTIO_VERSION="${CONTEXTIO_VERSION:-0.3.0}"
 
-if ! npm install -g --prefix "$NPM_PREFIX" "@contextio/cli@${CONTEXTIO_VERSION}"; then
-  echo "[contextio] warning: npm install failed (offline? network?)" >&2
+if ! bun install -g "@contextio/cli@${CONTEXTIO_VERSION}"; then
+  echo "[contextio] warning: bun install -g failed (offline? network?)" >&2
   exit 0
 fi
 
-export PATH="${NPM_PREFIX}/bin:$PATH"
+export PATH="${HOME}/.cache/.bun/bin:$PATH"
 if command -v ctxio >/dev/null 2>&1; then
-  echo "[contextio] installed $(ctxio --version 2>/dev/null || echo ctxio) at ${NPM_PREFIX}"
+  echo "[contextio] installed $(ctxio --version 2>/dev/null || echo ctxio) via bun ($(command -v ctxio))"
 else
-  echo "[contextio] warning: ctxio binary missing after install" >&2
+  echo "[contextio] warning: ctxio binary missing after bun install -g" >&2
 fi
 
 # Install the ensure-proxy helper next to other user bins so the shell wrapper
