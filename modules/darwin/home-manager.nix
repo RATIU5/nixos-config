@@ -104,7 +104,11 @@
         # Retry once: aqua/github backends hit transient network/rate-limit
         # failures that a second attempt clears. reshim afterwards so new tools
         # (e.g. herdr) get a PATH shim without a manual `mise reshim`.
+        # mise's rustup-init (and some backends) shell out to curl/wget, which
+        # aren't on the minimal activation PATH — prepend curl so rust@stable
+        # doesn't fail the whole install.
         home.activation.miseInstall = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          export PATH="${pkgs.curl}/bin:$PATH"
           $DRY_RUN_CMD ${pkgs.mise}/bin/mise install \
             || $DRY_RUN_CMD ${pkgs.mise}/bin/mise install \
             || echo "warning: mise install failed (offline? network?)"
