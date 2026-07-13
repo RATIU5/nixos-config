@@ -101,9 +101,14 @@
         # rustup). Idempotent: already-installed versions are no-ops. Network
         # required on first run; failure is non-fatal so offline switches still
         # succeed.
+        # Retry once: aqua/github backends hit transient network/rate-limit
+        # failures that a second attempt clears. reshim afterwards so new tools
+        # (e.g. herdr) get a PATH shim without a manual `mise reshim`.
         home.activation.miseInstall = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-          $DRY_RUN_CMD ${pkgs.mise}/bin/mise install || \
-            echo "warning: mise install failed (offline? network?)"
+          $DRY_RUN_CMD ${pkgs.mise}/bin/mise install \
+            || $DRY_RUN_CMD ${pkgs.mise}/bin/mise install \
+            || echo "warning: mise install failed (offline? network?)"
+          $DRY_RUN_CMD ${pkgs.mise}/bin/mise reshim || true
         '';
         # Second-brain Obsidian vault: clone the private repo to ~/brain on
         # first activation (no-op when it already exists). Content lives in
