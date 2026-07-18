@@ -28,7 +28,7 @@
 	"title_bar": {
 		"show_menus": false
 	},
-	"colorize_brackets": true,
+	"colorize_brackets": false,
 	"completions": {
 		"words_min_length": 3
 	},
@@ -65,7 +65,6 @@
 	"ui_font_family": "SF Pro Display",
 	"buffer_line_height": "comfortable",
 	"buffer_font_weight": 400.0,
-	"icon_theme": "Colored Zed Icons Theme Dark",
 	"redact_private_values": false,
 	"telemetry": {
 		"diagnostics": true,
@@ -139,7 +138,7 @@
 	"theme": {
 		"mode": "dark",
 		"light": "Gruvbox Light",
-		"dark": "One Dark"
+		"dark": "Alabaster Dark"
 	},
 	"lsp": {
 		"biome": {
