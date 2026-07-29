@@ -17,7 +17,10 @@
     # Homebrew PR #22592 (preliminary macOS 27 support). Drop this override and
     # the nix-homebrew.package line below once that lands in a tagged release.
     brew-src = {
-      url = "github:Homebrew/brew/7750fa03645dc7b72f35dfde2d766bea3b006866";
+      # Bumped to include Resource::Patch#type (required by newer homebrew-core
+      # formulae like python@3.14; the old pin crashed `brew upgrade` with
+      # `undefined method 'type' for an instance of Resource::Patch`).
+      url = "github:Homebrew/brew/ebba6285f24fc5dc066db43cc9a0e341fd4a4ea2";
       flake = false;
     };
     homebrew-bundle = {

@@ -50,14 +50,6 @@ if [[ "$NEEDS_BUILD" == "1" ]]; then
   echo "[ols] building..."
   cd "$OLS_DIR"
 
-  # Odin dev-2026-05 added .Haiku to Odin_OS_Type; patch OLS until it catches up.
-  BUILD_FILE="src/server/build.odin"
-  if ! grep -q '\.Haiku' "$BUILD_FILE"; then
-    awk '/\.Unknown[[:space:]]*=[[:space:]]*"unknown",/{print; print "\t.Haiku        = \"haiku\","; next}1' \
-      "$BUILD_FILE" > "$BUILD_FILE.tmp" && mv "$BUILD_FILE.tmp" "$BUILD_FILE"
-    echo "[ols] patched: added .Haiku to os_enum_to_string"
-  fi
-
   ./build.sh
   ./odinfmt.sh
   echo "[ols] built ($(git -C "$OLS_DIR" rev-parse --short HEAD))"

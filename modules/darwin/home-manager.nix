@@ -24,6 +24,15 @@
     # $ mas search <app name>
     #
     enable = true;
+    # Keep brew formulae in sync with the pinned homebrew-core flake input on
+    # every `build-switch`. Without this, bumping homebrew-core is a no-op for
+    # already-installed formulae (e.g. odin stays on an old dev-YYYY-MM version
+    # while OLS builds against master and starts referencing newer tokens).
+    onActivation = {
+      autoUpdate = false;   # formula versions are pinned via the flake input
+      upgrade    = true;    # ...so upgrade to whatever that pin resolves to
+      cleanup    = "none";
+    };
     casks  = pkgs.callPackage ./casks.nix { inherit profile; };
     brews = [
       # bobrwm: HEAD-only Zig tiling WM from the bobrwm/tap tap (registered in
