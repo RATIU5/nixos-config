@@ -15,6 +15,7 @@
  * api.x.ai (requires CONTEXT_PROXY_ALLOW_TARGET_OVERRIDE=1 on the proxy).
  */
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { execFileSync } from "node:child_process";
 
 const DEFAULT_PROXY = "http://127.0.0.1:4040";
 
@@ -50,9 +51,24 @@ function proxyRoot(): string | null {
   return raw || null;
 }
 
+/**
+ * ponytail: fail open. If the proxy isn't listening, rewriting baseUrls sends
+ * every provider to a dead port and pi reports only "Error: Connection error."
+ */
+function proxyReachable(root: string): boolean {
+  try {
+    const { hostname, port } = new URL(root);
+    execFileSync("nc", ["-z", "-w", "1", hostname, port || "80"], { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export default function (pi: ExtensionAPI) {
   const root = proxyRoot();
   if (!root) return;
+  if (!proxyReachable(root)) return;
 
   for (const provider of PROVIDERS) {
     pi.registerProvider(provider.name, {
