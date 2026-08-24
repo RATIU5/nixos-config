@@ -8,9 +8,11 @@
     shell    = pkgs.zsh;
   };
 
-  # bobrwm (tiling WM) manages its own launchd agent via `bobrwm service
-  # install/start/stop`. Run those once manually; no Nix LaunchAgent here to
-  # avoid a competing second instance.
+  # bobrwm (tiling WM) is installed as a Homebrew cask (Bobrwm.app). Set
+  # `.start_at_login = true` in dotfiles/config/bobrwm/config.zon so the app
+  # registers its bundled LaunchAgent; config is copied to a real file on
+  # activation (see installBobrwmConfig) because the GUI cannot read nix-store
+  # symlinks reliably.
 
   homebrew = {
     # This is a module from nix-darwin
@@ -35,9 +37,6 @@
     };
     casks  = pkgs.callPackage ./casks.nix { inherit profile; };
     brews = [
-      # bobrwm: HEAD-only Zig tiling WM from the bobrwm/tap tap (registered in
-      # nix-homebrew.taps). Builds from source on install; pulls zig as a dep.
-      { name = "bobrwm/tap/bobrwm"; args = [ "HEAD" ]; }
       # odin: latest-release bottle. The nixpkgs build breaks on Apple SDK 26
       # (compiler-rt-libc-18 fails); Homebrew tracks current odin and is what
       # OLS is built from source against (see modules/shared/packages.nix).
@@ -50,22 +49,24 @@
     #};
   };
 
-<<<<<<< Updated upstream
-=======
   # bobrwm/tap ships a disabled stub formula and a cask with the same name;
   # brew bundle fetch resolves the clash as a formula and fails. Install the
   # cask directly after bundle instead (see activationScripts.homebrew below).
   system.activationScripts.homebrew.text = lib.mkAfter (
     lib.optionalString (profile != "vm") ''
       if [ -f /opt/homebrew/bin/brew ]; then
-        echo "installing bobrwm cask..." >&2
-        sudo --preserve-env=PATH --user=${user} --set-home \
-          env HOMEBREW_NO_AUTO_UPDATE=1 /opt/homebrew/bin/brew install --cask bobrwm/tap/bobrwm
+        if sudo --preserve-env=PATH --user=${user} --set-home \
+          env HOMEBREW_NO_AUTO_UPDATE=1 /opt/homebrew/bin/brew list --cask bobrwm/tap/bobrwm &>/dev/null; then
+          echo "bobrwm cask already installed — skipping" >&2
+        else
+          echo "installing bobrwm cask..." >&2
+          sudo --preserve-env=PATH --user=${user} --set-home \
+            env HOMEBREW_NO_AUTO_UPDATE=1 /opt/homebrew/bin/brew install --cask bobrwm/tap/bobrwm
+        fi
       fi
     ''
   );
 
->>>>>>> Stashed changes
   home-manager = {
     useGlobalPkgs = true;
     # On a fresh machine, pre-existing dotfiles (the bootstrap ~/.ssh/config from
@@ -87,6 +88,11 @@
           # so the CLI (`ghostty +list-themes`, etc.) works like the old nix build.
           file.".local/bin/ghostty".source =
             config.lib.file.mkOutOfStoreSymlink "/Applications/Ghostty.app/Contents/MacOS/ghostty";
+          # Bobrwm cask symlinks bobrwm-cli → bobrwm under /opt/homebrew/bin;
+          # mirror onto ~/.local/bin for shells and activation scripts that skip
+          # the full login PATH.
+          file.".local/bin/bobrwm".source =
+            config.lib.file.mkOutOfStoreSymlink "/Applications/Bobrwm.app/Contents/MacOS/bobrwm-cli";
           # Login-shell / sh capture path for cargo (complements sessionPath + zshrc).
           # Conditional: rustup creates ~/.cargo/env; skip until toolchain exists.
           file.".profile".text = ''
@@ -106,10 +112,15 @@
         # gh creates and owns hosts.yml itself on first login. The static
         # settings in dotfiles/config/gh/config.yml are still linked below.
         # Auto-link every top-level entry under dotfiles/config/ into ~/.config/.
-        # herdr config lives at dotfiles/config/herdr/config.toml.
-        xdg.configFile = builtins.mapAttrs
-          (name: _: { source = ../../dotfiles/config + "/${name}"; recursive = true; })
-          (builtins.readDir ../../dotfiles/config);
+        # bobrwm is excluded: Bobrwm.app needs a real config file (see
+        # installBobrwmConfig). herdr config lives at dotfiles/config/herdr/config.toml.
+        xdg.configFile =
+          let
+            configEntries = builtins.removeAttrs (builtins.readDir ../../dotfiles/config) [ "bobrwm" ];
+          in
+          builtins.mapAttrs
+            (name: _: { source = ../../dotfiles/config + "/${name}"; recursive = true; })
+            configEntries;
         programs = {} // import ../shared/home-manager.nix { inherit config pkgs lib user fullName email; };
         manual.manpages.enable = false;
         # Clone and compile OLS from source against the Homebrew odin on each
@@ -118,23 +129,12 @@
           $DRY_RUN_CMD ${pkgs.writeShellScript "build-ols"
             (builtins.readFile ./scripts/build-ols.sh)}
         '';
-        # Install mise tools declared in dotfiles/config/mise/config.toml
-        # (linked to ~/.config/mise/). Includes the rust toolchain (stable via
-        # rustup). Idempotent: already-installed versions are no-ops. Network
-        # required on first run; failure is non-fatal so offline switches still
-        # succeed.
-        # Retry once: aqua/github backends hit transient network/rate-limit
-        # failures that a second attempt clears. reshim afterwards so new tools
-        # (e.g. herdr) get a PATH shim without a manual `mise reshim`.
-        # mise's rustup-init (and some backends) shell out to curl/wget, which
-        # aren't on the minimal activation PATH — prepend curl so rust@stable
-        # doesn't fail the whole install.
-        home.activation.miseInstall = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-          export PATH="${pkgs.curl}/bin:$PATH"
-          $DRY_RUN_CMD ${pkgs.mise}/bin/mise install \
-            || $DRY_RUN_CMD ${pkgs.mise}/bin/mise install \
-            || echo "warning: mise install failed (offline? network?)"
-          $DRY_RUN_CMD ${pkgs.mise}/bin/mise reshim || true
+        # Copy bobrwm config to ~/.config/bobrwm/config.zon (real file, not a
+        # nix-store symlink) and reload when Bobrwm.app is already running.
+        home.activation.installBobrwmConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          $DRY_RUN_CMD ${pkgs.writeShellScript "install-bobrwm-config"
+            (builtins.replaceStrings [ "@configSrc@" ] [ "${../../dotfiles/config/bobrwm/config.zon}" ]
+              (builtins.readFile ./scripts/install-bobrwm-config.sh))}
         '';
         # Second-brain Obsidian vault: clone the private repo to ~/brain on
         # first activation (no-op when it already exists). Content lives in
@@ -166,10 +166,10 @@
             $DRY_RUN_CMD ${syncScript}
           '';
         # Install Herdr's Pi lifecycle/session integration after the pi tree
-        # is synced (extensions dir must exist) and mise has had a chance to
-        # install the herdr binary. Re-runs on every switch so a herdr upgrade
-        # refreshes the bundled extension.
-        home.activation.installHerdrIntegrations = lib.hm.dag.entryAfter [ "syncPiConfig" "miseInstall" ] ''
+        # is synced (extensions dir must exist). Re-runs on every switch so a
+        # herdr upgrade refreshes the bundled extension.
+        home.activation.installHerdrIntegrations = lib.hm.dag.entryAfter [ "syncPiConfig" ] ''
+          export PATH="${lib.makeBinPath [ pkgs.herdr ]}:$PATH"
           $DRY_RUN_CMD ${pkgs.writeShellScript "install-herdr-integrations"
             (builtins.readFile ./scripts/install-herdr-integrations.sh)}
         '';

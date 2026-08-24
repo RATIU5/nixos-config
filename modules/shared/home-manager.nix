@@ -165,8 +165,7 @@
       export PATH="$HOME/.cache/.bun/bin:$PATH"
       export PATH="$HOME/.nub/bin:$PATH"
 
-      # Rust toolchain (mise/rustup) installs cargo/rustc/rustfmt/clippy here.
-      # Keep ahead of system/nix paths so the active toolchain wins.
+      # Rust toolchain (from project `mise install` or manual rustup) lands here.
       export PATH="$HOME/.cargo/bin:$PATH"
       export PATH="/opt/homebrew/bin:$PATH"
       export PATH="$HOME/.opencode/bin:$PATH"

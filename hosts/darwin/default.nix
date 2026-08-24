@@ -1,4 +1,4 @@
-{ agenix, config, pkgs, lib, user, ... }:
+{ agenix, config, pkgs, lib, user, profile, ... }:
 {
   imports = [
     ../../modules/darwin/home-manager.nix
@@ -183,6 +183,18 @@
             "80"  = { enabled = false; };  # Move left a space (variant)
             "81"  = { enabled = false; };  # Move right a space
             "82"  = { enabled = false; };  # Move right a space (variant)
+            # Switch to Desktop 1–10 (^1 … ^0). macOS grabs these before bobrwm
+            # can handle them for virtual workspace switching.
+            "118" = { enabled = false; };  # Switch to Desktop 1 (^1)
+            "119" = { enabled = false; };  # Switch to Desktop 2 (^2)
+            "120" = { enabled = false; };  # Switch to Desktop 3 (^3)
+            "121" = { enabled = false; };  # Switch to Desktop 4 (^4)
+            "122" = { enabled = false; };  # Switch to Desktop 5 (^5)
+            "123" = { enabled = false; };  # Switch to Desktop 6 (^6)
+            "124" = { enabled = false; };  # Switch to Desktop 7 (^7)
+            "125" = { enabled = false; };  # Switch to Desktop 8 (^8)
+            "126" = { enabled = false; };  # Switch to Desktop 9 (^9)
+            "127" = { enabled = false; };  # Switch to Desktop 10 (^0)
           };
         };
         # Desktop widgets (macOS Sonoma+). Hide them everywhere.
@@ -208,9 +220,13 @@
     # Set the desktop wallpaper from the repo-stored image (copied into the Nix
     # store). Runs in the logged-in user's GUI session so System Events can talk
     # to the WindowServer; applies to every currently-connected desktop/space.
-    activationScripts.postActivation.text = ''
+    activationScripts.postActivation.text = let
+      wallpaper =
+        if profile == "work" then ../../assets/wallpaper/wallpaper2.png
+        else ../../assets/wallpaper/mitsuri-kanroji-3840x2160-22627.PNG;
+    in ''
       echo "setting wallpaper..." >&2
-      sudo -u ${user} osascript -e 'tell application "System Events" to tell every desktop to set picture to "${../../assets/wallpaper/mitsuri-kanroji-3840x2160-22627.PNG}"'
+      sudo -u ${user} osascript -e 'tell application "System Events" to tell every desktop to set picture to "${wallpaper}"'
 
       # Rebind symbolic hotkeys immediately. `defaults write` (done above via
       # CustomUserPreferences) does NOT take effect on its own — activateSettings

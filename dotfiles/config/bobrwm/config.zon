@@ -1,6 +1,8 @@
 // bobrwm config — place at ~/.config/bobrwm/config.zon
 // or pass via: bobrwm -c /path/to/config.zon
 .{
+.start_at_login = true,
+
     // Layout algorithm.
     // .layout = .bsp,
     // Or fullscreen-per-window tiling:
@@ -33,7 +35,40 @@
     // },
 
     .keybinds = .{
-        // alt+1..9 → focus workspace
+        // Bobrwm merges config keybinds with built-in defaults (Option-based).
+        // Reassign each default Option trigger to center_float — a no-op on tiled
+        // windows — so workspace/navigation is Control-only below.
+        .{ .key = "1", .mods = .{ .alt = true }, .action = .center_float },
+        .{ .key = "2", .mods = .{ .alt = true }, .action = .center_float },
+        .{ .key = "3", .mods = .{ .alt = true }, .action = .center_float },
+        .{ .key = "4", .mods = .{ .alt = true }, .action = .center_float },
+        .{ .key = "5", .mods = .{ .alt = true }, .action = .center_float },
+        .{ .key = "6", .mods = .{ .alt = true }, .action = .center_float },
+        .{ .key = "7", .mods = .{ .alt = true }, .action = .center_float },
+        .{ .key = "8", .mods = .{ .alt = true }, .action = .center_float },
+        .{ .key = "9", .mods = .{ .alt = true }, .action = .center_float },
+        .{ .key = "1", .mods = .{ .alt = true, .shift = true }, .action = .center_float },
+        .{ .key = "2", .mods = .{ .alt = true, .shift = true }, .action = .center_float },
+        .{ .key = "3", .mods = .{ .alt = true, .shift = true }, .action = .center_float },
+        .{ .key = "4", .mods = .{ .alt = true, .shift = true }, .action = .center_float },
+        .{ .key = "5", .mods = .{ .alt = true, .shift = true }, .action = .center_float },
+        .{ .key = "6", .mods = .{ .alt = true, .shift = true }, .action = .center_float },
+        .{ .key = "7", .mods = .{ .alt = true, .shift = true }, .action = .center_float },
+        .{ .key = "8", .mods = .{ .alt = true, .shift = true }, .action = .center_float },
+        .{ .key = "9", .mods = .{ .alt = true, .shift = true }, .action = .center_float },
+        .{ .key = "h", .mods = .{ .alt = true }, .action = .center_float },
+        .{ .key = "j", .mods = .{ .alt = true }, .action = .center_float },
+        .{ .key = "k", .mods = .{ .alt = true }, .action = .center_float },
+        .{ .key = "l", .mods = .{ .alt = true }, .action = .center_float },
+        .{ .key = "return", .mods = .{ .alt = true }, .action = .center_float },
+        .{ .key = "h", .mods = .{ .alt = true, .shift = true }, .action = .center_float },
+        .{ .key = "j", .mods = .{ .alt = true, .shift = true }, .action = .center_float },
+        .{ .key = "k", .mods = .{ .alt = true, .shift = true }, .action = .center_float },
+        .{ .key = "l", .mods = .{ .alt = true, .shift = true }, .action = .center_float },
+        .{ .key = "r", .mods = .{ .alt = true, .shift = true }, .action = .center_float },
+
+        // ctrl+1..9 → focus workspace (macOS ^1..^9 desktop shortcuts disabled in
+        // hosts/darwin/default.nix so bobrwm receives these keys).
         .{ .key = "1", .mods = .{ .ctrl = true }, .action = .focus_workspace, .arg = 1 },
         .{ .key = "2", .mods = .{ .ctrl = true }, .action = .focus_workspace, .arg = 2 },
         .{ .key = "3", .mods = .{ .ctrl = true }, .action = .focus_workspace, .arg = 3 },
@@ -44,7 +79,7 @@
         .{ .key = "8", .mods = .{ .ctrl = true }, .action = .focus_workspace, .arg = 8 },
         .{ .key = "9", .mods = .{ .ctrl = true }, .action = .focus_workspace, .arg = 9 },
 
-        // alt+shift+1..9 → move window to workspace
+        // ctrl+shift+1..9 → move window to workspace
         .{ .key = "1", .mods = .{ .ctrl = true, .shift = true }, .action = .move_to_workspace, .arg = 1 },
         .{ .key = "2", .mods = .{ .ctrl = true, .shift = true }, .action = .move_to_workspace, .arg = 2 },
         .{ .key = "3", .mods = .{ .ctrl = true, .shift = true }, .action = .move_to_workspace, .arg = 3 },
@@ -55,17 +90,20 @@
         .{ .key = "8", .mods = .{ .ctrl = true, .shift = true }, .action = .move_to_workspace, .arg = 8 },
         .{ .key = "9", .mods = .{ .ctrl = true, .shift = true }, .action = .move_to_workspace, .arg = 9 },
 
-        // alt+hjkl → focus direction
+        // ctrl+hjkl → focus direction
         .{ .key = "h", .mods = .{ .ctrl = true }, .action = .focus_left },
         .{ .key = "j", .mods = .{ .ctrl = true }, .action = .focus_down },
         .{ .key = "k", .mods = .{ .ctrl = true }, .action = .focus_up },
         .{ .key = "l", .mods = .{ .ctrl = true }, .action = .focus_right },
 
-        // alt+return → toggle split direction
+        // ctrl+return → toggle split direction
         .{ .key = "return", .mods = .{ .ctrl = true }, .action = .toggle_split },
 
         // ctrl+f → toggle floating window
         .{ .key = "f", .mods = .{ .ctrl = true }, .action = .toggle_float },
+
+        // ctrl+shift+r → reload config (replaces default Option+Shift+R)
+        .{ .key = "r", .mods = .{ .ctrl = true, .shift = true }, .action = .reload_config },
     },
 
     .workspace_assignments = .{

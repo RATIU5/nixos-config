@@ -40,7 +40,7 @@ with pkgs; [
   pandoc # Document converter
   ripgrep # Fast text search tool
   # starship is installed via programs.starship in home-manager.nix
-  # tmux/sesh removed: herdr is the terminal workspace (mise + auto-start).
+  # tmux/sesh removed: herdr is the terminal workspace (nix package + auto-start).
   tree # Directory tree viewer
   unzip # ZIP archive extractor
   uv # Python package installer
@@ -51,6 +51,7 @@ with pkgs; [
   # Workflow / dev TUIs
   lazydocker # Container TUI (works with podman via DOCKER_HOST)
   ast-grep # Structural code search/refactor (`sg`)
+  herdr # Agent multiplexer (terminal workspace; auto-starts in zsh)
   sd # Intuitive find/replace (sed without the line-noise)
   watchexec # Run a command on file change
   xh # Fast HTTP client (httpie-like)

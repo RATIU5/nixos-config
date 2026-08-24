@@ -1,25 +1,6 @@
-# Global mise tools. Linked to ~/.config/mise/config.toml; home-manager
-# activation runs `mise install` so these land on every machine.
-# Browse available tools: `mise registry` or https://mise.jdx.dev/registry.html
-
-[tools]
-# Shared — installed on every machine.
-node      = "lts"
-go        = "latest"
-ripgrep   = "latest"
-fd        = "latest"
-bat       = "latest"
-jq        = "latest"
-delta     = "latest"
-python    = "3.12"
-rust      = "stable"  # rustup-backed; puts cargo/rustc/rustfmt/clippy on ~/.cargo/bin
-# herdr: agent multiplexer. Installed via mise (aqua/github backend) rather
-# than Homebrew — nix-homebrew currently chokes loading some core formulas.
-# Pi bridge is installed by home.activation.installHerdrIntegrations.
-herdr     = "latest"
-
-[env]
-EDITOR = "helix"
+# mise is installed via Nix and activated in zsh for per-project toolchains.
+# Machine-wide tools (herdr, node, ripgrep, …) live in modules/shared/packages.nix.
+# Declare project runtimes in each repo's .mise.toml and run `mise install` there.
 
 [settings]
 # experimental = true

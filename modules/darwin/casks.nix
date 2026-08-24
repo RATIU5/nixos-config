@@ -30,11 +30,4 @@ lib.optionals (profile != "vm") ([
 
   # Communication
   "discord"
-<<<<<<< Updated upstream
-  "zoom"
-]
-++ lib.optionals (profile == "work") [
-  "slack" # Work comms (work profile only)
-=======
->>>>>>> Stashed changes
 ])

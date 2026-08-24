@@ -194,11 +194,11 @@
     "homebrew-bobrwm": {
       "flake": false,
       "locked": {
-        "lastModified": 1785167010,
-        "narHash": "sha256-H9Df23bWHe9iLoMTphCTVKHFAGYpMjB/7CdU/tUjqt8=",
+        "lastModified": 1785987048,
+        "narHash": "sha256-K9tMDNUJCBJyQo1cmee6yOZDCulhacnLqVdvfjrPnWc=",
         "owner": "bobrwm",
         "repo": "homebrew-tap",
-        "rev": "e77823cfa282057e5c5eb0720a6c09d5f00f1530",
+        "rev": "0c1ad978735ba5fde9dd0587b0513dcdba7e6066",
         "type": "github"
       },
       "original": {

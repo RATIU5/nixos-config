@@ -11,7 +11,7 @@ onboarding = false
 name = "catppuccin"
 
 [terminal]
-# Login shells on macOS so PATH (Homebrew, mise, cargo, …) is fully wired.
+# Login shells on macOS so PATH (Homebrew, nix profile, cargo, …) is fully wired.
 shell_mode = "auto"
 
 [keys]
