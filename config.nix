@@ -14,7 +14,7 @@
   # the value is the real macOS account name (`whoami`). Add one entry per
   # machine/account you use.
   machines = {
-    work     = "john.memmott";
+    work     = "johnmemmot";
     personal = "ratiu5";
     vm       = "admin"; # test VM
   };
