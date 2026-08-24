@@ -223,22 +223,6 @@
         "type": "github"
       }
     },
-    "homebrew-can1357": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1785171142,
-        "narHash": "sha256-VTFSUhTaYpi6gL3R1ISbLMJIuvXqcHwv04DYsUoX810=",
-        "owner": "can1357",
-        "repo": "homebrew-tap",
-        "rev": "9dec8a6847a6c8607d707d9c6230d5b56051bd59",
-        "type": "github"
-      },
-      "original": {
-        "owner": "can1357",
-        "repo": "homebrew-tap",
-        "type": "github"
-      }
-    },
     "homebrew-cask": {
       "flake": false,
       "locked": {
@@ -383,7 +367,6 @@
         "home-manager": "home-manager_2",
         "homebrew-bobrwm": "homebrew-bobrwm",
         "homebrew-bundle": "homebrew-bundle",
-        "homebrew-can1357": "homebrew-can1357",
         "homebrew-cask": "homebrew-cask",
         "homebrew-core": "homebrew-core",
         "llm-agents": "llm-agents",

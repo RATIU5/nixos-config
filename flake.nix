@@ -41,12 +41,6 @@
       url = "github:bobrwm/homebrew-tap";
       flake = false;
     };
-    # Third-party tap for omp (oh-my-pi coding agent CLI). `can1357/tap` ->
-    # github.com/can1357/homebrew-tap by Homebrew convention.
-    homebrew-can1357 = {
-      url = "github:can1357/homebrew-tap";
-      flake = false;
-    };
     secrets = {
       url = "git+ssh://git@github.com/RATIU5/nix-secrets.git";
       flake = false;
@@ -62,7 +56,7 @@
       url = "github:numtide/llm-agents.nix";
     };
   };
-  outputs = { self, darwin, nix-homebrew, brew-src, homebrew-bundle, homebrew-core, homebrew-cask, homebrew-bobrwm, homebrew-can1357, home-manager, nixpkgs, agenix, secrets, sf-mono-liga-src, llm-agents } @inputs:
+  outputs = { self, darwin, nix-homebrew, brew-src, homebrew-bundle, homebrew-core, homebrew-cask, homebrew-bobrwm, home-manager, nixpkgs, agenix, secrets, sf-mono-liga-src, llm-agents } @inputs:
     let
       # All personal settings (name, email, machines) live in config.nix —
       # edit that one file to make this repo yours.
@@ -141,7 +135,6 @@
                       "homebrew/homebrew-cask" = homebrew-cask;
                       "homebrew/homebrew-bundle" = homebrew-bundle;
                       "bobrwm/homebrew-tap" = homebrew-bobrwm;
-                      "can1357/homebrew-tap" = homebrew-can1357;
                     };
                     mutableTaps = false;
                     autoMigrate = true;

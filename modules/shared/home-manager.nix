@@ -163,6 +163,7 @@
       export PYTHONPATH="$HOME/.local-pip/packages:$PYTHONPATH"
       # bun global CLIs (ctxio, openspec, …) — prefer over ~/.npm-packages
       export PATH="$HOME/.cache/.bun/bin:$PATH"
+      export PATH="$HOME/.nub/bin:$PATH"
 
       # Rust toolchain (mise/rustup) installs cargo/rustc/rustfmt/clippy here.
       # Keep ahead of system/nix paths so the active toolchain wins.

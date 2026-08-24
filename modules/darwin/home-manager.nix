@@ -43,9 +43,6 @@
       # OLS is built from source against (see modules/shared/packages.nix).
       # `brew upgrade odin` to update both together.
       "odin"
-      # omp (oh-my-pi): AI coding agent CLI from can1357/tap (registered in
-      # nix-homebrew.taps). The formula installs zsh completions itself.
-      "can1357/tap/omp"
     ];
     #masApps = {
     #  "hidden-bar"   = 1452453066;
@@ -53,6 +50,22 @@
     #};
   };
 
+<<<<<<< Updated upstream
+=======
+  # bobrwm/tap ships a disabled stub formula and a cask with the same name;
+  # brew bundle fetch resolves the clash as a formula and fails. Install the
+  # cask directly after bundle instead (see activationScripts.homebrew below).
+  system.activationScripts.homebrew.text = lib.mkAfter (
+    lib.optionalString (profile != "vm") ''
+      if [ -f /opt/homebrew/bin/brew ]; then
+        echo "installing bobrwm cask..." >&2
+        sudo --preserve-env=PATH --user=${user} --set-home \
+          env HOMEBREW_NO_AUTO_UPDATE=1 /opt/homebrew/bin/brew install --cask bobrwm/tap/bobrwm
+      fi
+    ''
+  );
+
+>>>>>>> Stashed changes
   home-manager = {
     useGlobalPkgs = true;
     # On a fresh machine, pre-existing dotfiles (the bootstrap ~/.ssh/config from
@@ -177,6 +190,13 @@
         home.activation.installOpenSpec = lib.hm.dag.entryAfter [ "syncPiConfig" ] ''
           $DRY_RUN_CMD ${pkgs.writeShellScript "install-openspec"
             (builtins.readFile ./scripts/install-openspec.sh)}
+        '';
+        # Install nub (JS runtime/tooling) via upstream curl installer into
+        # ~/.nub/bin. PATH is managed in home-manager zshrc, not shell profiles.
+        home.activation.installNub = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          export PATH="${pkgs.curl}/bin:$PATH"
+          $DRY_RUN_CMD ${pkgs.writeShellScript "install-nub"
+            (builtins.readFile ./scripts/install-nub.sh)}
         '';
       };
   };

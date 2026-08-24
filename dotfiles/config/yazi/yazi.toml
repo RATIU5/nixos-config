@@ -10,7 +10,7 @@ edit = [
   { run = 'nvim', desc = "Edit", for = "macos" },
 ]
 browser = [
-  { run = '${BROWSER:-arc} "$@"', desc = "Browser", for = "macos" },
+  { run = 'open -a Helium "$@"', desc = "Browser", for = "macos" },
 ]
 open = [{ run = 'open "$@"', desc = "Open", for = "macos" }]
 reveal = [{ run = 'open -R "$1"', desc = "Reveal", for = "macos" }]
