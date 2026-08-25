@@ -116,6 +116,14 @@
         . /nix/var/nix/profiles/default/etc/profile.d/nix.sh
       fi
 
+      # zsh's NOMATCH (on by default) errors out a whole command line when an
+      # unquoted arg contains glob chars ('?', '*', '[', etc.) with no local
+      # filesystem match — a constant trap for pasting URLs with query
+      # strings (webapp https://x.com/y?z=1). Disable it so those pass
+      # through literally instead of aborting, matching bash's default
+      # behavior.
+      unsetopt nomatch
+
       # Save and restore last directory
       LAST_DIR_FILE="$HOME/.zsh_last_dir"
 
@@ -152,6 +160,11 @@
       # since the binary is symlinked onto PATH. See modules/shared/packages.nix.
       export OLS_BUILTIN_FOLDER="$HOME/.local/share/ols/builtin"
 
+      # The Nix-packaged Shopify CLI tries to download cloudflared into its
+      # own (read-only) store path when `shopify app dev` starts a tunnel.
+      # Pointing it at the nixpkgs cloudflared skips that download.
+      export SHOPIFY_CLI_CLOUDFLARED_PATH="${pkgs.cloudflared}/bin/cloudflared"
+
       # Define PATH variables
       export PATH=$HOME/.pnpm-packages/bin:$HOME/.pnpm-packages:$PATH
       # Legacy npm global prefix (kept for any older tools).
@@ -164,6 +177,10 @@
       # bun global CLIs (ctxio, openspec, …) — prefer over ~/.npm-packages
       export PATH="$HOME/.cache/.bun/bin:$PATH"
       export PATH="$HOME/.nub/bin:$PATH"
+      # nub's `install -g` links bins into pnpm's standard macOS global dir
+      # (~/Library/pnpm), not ~/.nub/bin itself -- e.g. `nub install -g pake-cli`.
+      export PNPM_HOME="$HOME/Library/pnpm"
+      export PATH="$PNPM_HOME:$PATH"
 
       # Rust toolchain (from project `mise install` or manual rustup) lands here.
       export PATH="$HOME/.cargo/bin:$PATH"
@@ -300,6 +317,205 @@
                   command ssh "$@"
                   ;;
           esac
+      }
+
+      # ---------------------------------------------------------------------
+      # webapp - package a website as a native desktop app, via Pake
+      #
+      #   webapp <url> [name]     build a desktop app for a URL
+      #   webapp -l               list apps you've built
+      #
+      # Backed by Pake (https://github.com/tw93/Pake): a Rust/Tauri CLI that
+      # compiles a real, tiny (~5MB) native .app around the system webview.
+      # No AppleScript, no UI automation, no Accessibility/Automation
+      # permissions -- just a CLI build with a stable --json result.
+      #
+      # Requires: npm install -g pake-cli
+      #   (needs Node 20.9+; pake offers to install a Rust toolchain itself
+      #   the first time cargo is missing)
+      #
+      # Builds happen in a scratch dir; only the finished .app is moved into
+      # /Applications (falls back to ~/Applications if that's not writable --
+      # Finder and Launchpad only look in /Applications, not ~/Applications,
+      # so this is what makes the app show up there instead of just Spotlight
+      # and Raycast). A small TSV registry (webapp -l) tracks what's built.
+      # ---------------------------------------------------------------------
+
+      webapp() {
+        local url="$1"
+        local name="$2"
+
+        case "$url" in
+          -l | --list)
+            _webapp_list
+            return $?
+            ;;
+          "" | -h | --help)
+            command cat <<'USAGE'
+      Usage: webapp <url> [name]
+             webapp -l
+
+      Packages a website (or a local static build) as a native desktop app in
+      /Applications, using Pake (https://github.com/tw93/Pake) -- a Rust/Tauri
+      CLI that compiles a real, tiny (~5MB) app around the system webview.
+      Launch it from Launchpad, Raycast, Spotlight, or Finder by name.
+
+        webapp https://app.asana.com
+        webapp app.asana.com Asana
+        webapp https://mail.google.com "Gmail"
+        webapp ./dist MyTool          # local static build (needs index.html)
+
+      Name is optional for a URL -- left off, it's derived from the hostname.
+      Google OAuth and similar SSO flows can reject the embedded webview; that's
+      a Pake/webview limitation, not something this function can fix.
+
+      Requires: npm install -g pake-cli
+        (needs Node 20.9+; pake offers to install a Rust toolchain itself the
+        first time cargo is missing)
+      USAGE
+            return 1
+            ;;
+        esac
+
+        if [ "$(uname -s)" != "Darwin" ]; then
+          printf 'webapp: macOS only\n' >&2
+          return 1
+        fi
+
+        if ! command -v pake >/dev/null 2>&1; then
+          printf 'webapp: pake-cli is not installed.\n' >&2
+          printf '  npm install -g pake-cli\n' >&2
+          return 4
+        fi
+
+        if ! command -v jq >/dev/null 2>&1; then
+          printf 'webapp: jq is required to parse pake --json output.\n' >&2
+          return 4
+        fi
+
+        case "$url" in
+          http://* | https://*) ;;
+          *)
+            if [ -e "$url" ]; then
+              :
+            else
+              url="https://$url"
+            fi
+            ;;
+        esac
+
+        if [ -z "$name" ]; then
+          case "$url" in
+            http://* | https://*)
+              name="$(printf '%s\n' "$url" | sed -E 's#^[a-z]+://##; s#/.*##; s#^www\.##; s#\..*##')"
+              ;;
+            *)
+              name="$(basename "$url")"
+              ;;
+          esac
+          name="$(printf '%s' "$name" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')"
+        fi
+
+        # /Applications is drwxrwxr-x root:admin on a normal Mac, so any admin
+        # user (the default account type) can write there without sudo. Fall
+        # back to ~/Applications (Spotlight/Raycast still find it there) if not.
+        local appdir="/Applications"
+        [ -w "$appdir" ] || appdir="$HOME/Applications"
+        mkdir -p "$appdir"
+
+        local registry="$XDG_DATA_HOME/webapp/registry.tsv"
+        mkdir -p "$(dirname "$registry")"
+
+        local builddir
+        builddir="$(mktemp -d "''${TMPDIR:-/tmp}/webapp-build.XXXXXX")" || {
+          printf 'webapp: could not create a temp build directory\n' >&2
+          return 1
+        }
+
+        printf 'Building "%s" from %s ...\n' "$name" "$url" >&2
+        _webapp_do_build "$url" "$name" "$builddir" "$registry" "$appdir"
+        local rc=$?
+        rm -rf "$builddir"
+        return "$rc"
+      }
+
+      # Runs pake, parses its --json contract, moves the result into $appdir,
+      # and records it in the registry. Split out from webapp() so the caller
+      # can guarantee the temp build dir is always cleaned up.
+      _webapp_do_build() {
+        local url="$1" name="$2" builddir="$3" registry="$4" appdir="$5"
+
+        # NOTE: not named "status" -- zsh reserves that as a read-only alias
+        # for $?, and `local status` fails with "read-only variable: status".
+        local result pakestatus
+        result="$(cd "$builddir" && pake "$url" --name "$name" --targets app --json 2>/dev/null)"
+        pakestatus=$?
+
+        if [ -z "$result" ] || ! printf '%s' "$result" | jq -e . >/dev/null 2>&1; then
+          printf 'webapp: pake produced no usable JSON output (exit %d).\n' "$pakestatus" >&2
+          printf '  Re-run without --json to see the full build log:\n' >&2
+          printf '  cd "%s" && pake "%s" --name "%s" --targets app\n' "$builddir" "$url" "$name" >&2
+          [ "$pakestatus" -eq 0 ] && pakestatus=1
+          return "$pakestatus"
+        fi
+
+        local ok
+        ok="$(printf '%s' "$result" | jq -r '.ok')"
+        if [ "$ok" != "true" ]; then
+          local code msg hint
+          code="$(printf '%s' "$result" | jq -r '.error.code // "UNKNOWN"')"
+          msg="$(printf '%s' "$result" | jq -r '.error.message // "no message"')"
+          hint="$(printf '%s' "$result" | jq -r '.error.hint // empty')"
+          printf 'webapp: build failed (%s): %s\n' "$code" "$msg" >&2
+          [ -n "$hint" ] && printf '  hint: %s\n' "$hint" >&2
+          [ "$pakestatus" -eq 0 ] && pakestatus=1
+          return "$pakestatus"
+        fi
+
+        local outpath
+        outpath="$(printf '%s' "$result" | jq -r '[.outputs[] | select(.format=="app")][0].path // .outputs[0].path // empty')"
+
+        if [ -z "$outpath" ] || [ ! -e "$outpath" ]; then
+          printf 'webapp: pake reported success but no output file was found.\n' >&2
+          printf '%s\n' "$result" >&2
+          return 1
+        fi
+
+        local appname target
+        appname="$(basename "$outpath")"
+        target="$appdir/$appname"
+        if [ "$outpath" != "$target" ]; then
+          rm -rf "$target"
+          mv -f "$outpath" "$target" && outpath="$target"
+        fi
+
+        printf 'Created %s\n' "$outpath"
+        printf '%s\t%s\t%s\t%s\n' "$name" "$url" "$outpath" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >>"$registry"
+
+        local warnings
+        warnings="$(printf '%s' "$result" | jq -r '.warnings[]?' 2>/dev/null)"
+        [ -n "$warnings" ] && printf 'webapp: warnings:\n%s\n' "$warnings" >&2
+
+        printf 'Launch it from Raycast or Spotlight as "%s".\n' "$name"
+      }
+
+      # List apps previously built by webapp, from its registry file.
+      _webapp_list() {
+        local registry="$XDG_DATA_HOME/webapp/registry.tsv"
+        if [ ! -s "$registry" ]; then
+          printf 'No webapp-built apps found.\n' >&2
+          return 1
+        fi
+
+        local name url path createdAt found=0
+        while IFS=$'\t' read -r name url path createdAt; do
+          [ -n "$name" ] || continue
+          [ -e "$path" ] || continue
+          printf '%-24s %-45s %s\n' "$name" "$url" "$path"
+          found=1
+        done <"$registry"
+
+        [ "$found" -eq 1 ] || printf 'No webapp-built apps found (registry entries no longer exist on disk).\n' >&2
       }
 
       # Auto-start herdr only in a real interactive TTY (regular terminal

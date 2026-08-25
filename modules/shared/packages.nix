@@ -111,6 +111,7 @@ with pkgs; [
   gopls # Go
   golangci-lint-langserver # Go linting (referenced in languages.toml)
   shopify-cli # Shopify Liquid: `shopify theme language-server`
+  cloudflared # Tunnels for `shopify app dev` (see SHOPIFY_CLI_CLOUDFLARED_PATH)
   # -- Formatters / linters --
   oxlint # Fast JS/TS linter (oxc); LSP not yet in nixpkgs
   stylua # Lua formatter

@@ -1,9 +1,19 @@
 # mise is installed via Nix and activated in zsh for per-project toolchains.
 # Machine-wide tools (herdr, node, ripgrep, …) live in modules/shared/packages.nix.
 # Declare project runtimes in each repo's .mise.toml and run `mise install` there.
+#
+# This file is home-manager's linked copy of ~/.config/mise/config.toml (read-only
+# symlink into the Nix store), so `mise use -g` can't write to it -- edit it here
+# instead, same as any other dotfiles/config/* entry.
 
 [settings]
 # experimental = true
+
+[tools]
+# Global default so cargo/rustc are on PATH everywhere, not just inside a
+# project with its own .mise.toml. Needed by pake-cli (see `webapp` in
+# modules/shared/home-manager.nix), which shells out to cargo to build.
+rust = "latest"
 
 [tasks]
 # `mise run <name>` — see https://mise.jdx.dev/tasks/
