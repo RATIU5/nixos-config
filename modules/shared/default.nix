@@ -21,7 +21,13 @@
       # nixpkgs.pi-coding-agent lags; keep the attr name so packages.nix is stable.
       (final: prev: {
         pi-coding-agent =
-          llm-agents.packages.${prev.stdenv.hostPlatform.system}.pi;
+          llm-agents.packages.${prev.stdenv.hostPlatform.system}.pi.overrideAttrs (old: {
+            # Bun creates a linker-signed Mach-O, then Nix's fixup phase modifies
+            # it. Re-sign it before the version check or macOS kills it (SIGKILL).
+            nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [
+              prev.darwin.autoSignDarwinBinariesHook
+            ];
+          });
       })
       # vfkit source build dies at link on this Darwin/SDK (ld Trace/BPT trap).
       # Install the upstream-signed release binary as-is; re-codesign needs
