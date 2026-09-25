@@ -11,18 +11,6 @@
     nix-homebrew = {
       url = "github:zhaofengli-wip/nix-homebrew";
     };
-    # Override the Homebrew CLI source. nix-homebrew pins brew 5.1.11, which
-    # has no macOS 27 ("Golden Gate") support and dies with
-    # `unknown or unsupported macOS version: :dunno`. Pinned to the head of
-    # Homebrew PR #22592 (preliminary macOS 27 support). Drop this override and
-    # the nix-homebrew.package line below once that lands in a tagged release.
-    brew-src = {
-      # Bumped to include Resource::Patch#type (required by newer homebrew-core
-      # formulae like python@3.14; the old pin crashed `brew upgrade` with
-      # `undefined method 'type' for an instance of Resource::Patch`).
-      url = "github:Homebrew/brew/ebba6285f24fc5dc066db43cc9a0e341fd4a4ea2";
-      flake = false;
-    };
     homebrew-bundle = {
       url = "github:homebrew/homebrew-bundle";
       flake = false;
@@ -56,7 +44,7 @@
       url = "github:numtide/llm-agents.nix";
     };
   };
-  outputs = { self, darwin, nix-homebrew, brew-src, homebrew-bundle, homebrew-core, homebrew-cask, homebrew-bobrwm, home-manager, nixpkgs, agenix, secrets, sf-mono-liga-src, llm-agents } @inputs:
+  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, homebrew-bobrwm, home-manager, nixpkgs, agenix, secrets, sf-mono-liga-src, llm-agents } @inputs:
     let
       # All personal settings (name, email, machines) live in config.nix —
       # edit that one file to make this repo yours.
@@ -107,28 +95,12 @@
                   nix-homebrew = {
                     inherit user;
                     enable = true;
-                    # See the brew-src input above (macOS 27 support).
-                    package = inputs.brew-src // {
-                      name = "brew-5.1.15-macos27";
-                      version = "5.1.15";
-                    };
-                    # The newer brew (from brew-src) defaults
-                    # HOMEBREW_REQUIRE_TAP_TRUST=true, which refuses to load
-                    # formulae from third-party taps (e.g. bobrwm/tap) until
-                    # `brew trust`ed. nix-homebrew runs brew non-interactively,
-                    # so opt out declaratively. Tied to the brew-src override;
-                    # remove both together.
+                    # Brew defaults HOMEBREW_REQUIRE_TAP_TRUST=true, which
+                    # refuses to load formulae from third-party taps (e.g.
+                    # bobrwm/tap) until `brew trust`ed. nix-homebrew runs brew
+                    # non-interactively, so opt out declaratively.
                     extraEnv = {
                       HOMEBREW_NO_REQUIRE_TAP_TRUST = "1";
-                      # Brew 5.1.x's HOMEBREW_FORBID_PACKAGES_FROM_PATHS check
-                      # rejects formulae whose realpath resolves outside
-                      # Library/Taps — i.e. every nix-homebrew symlinked
-                      # third-party tap ("Homebrew requires formulae to be in a
-                      # tap, rejecting ... (/nix/store/...)"). Setting
-                      # HOMEBREW_DEVELOPER is the only opt-out on 5.1.x; fixed
-                      # properly in brew >= 6.0.1 (Homebrew/brew#22872), so
-                      # remove alongside the brew-src pin.
-                      HOMEBREW_DEVELOPER = "1";
                     };
                     taps = {
                       "homebrew/homebrew-core" = homebrew-core;

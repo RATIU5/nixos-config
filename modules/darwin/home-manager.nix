@@ -42,6 +42,10 @@
       # OLS is built from source against (see modules/shared/packages.nix).
       # `brew upgrade odin` to update both together.
       "odin"
+      # llvm@20: matches odin's LLVM (20.1.8). llvm@22: its ASan runtime doesn't
+      # deadlock on macOS 27 beta like 20's does; used by the odin-asan alias.
+      "llvm@20"
+      "llvm@22"
     ];
     #masApps = {
     #  "hidden-bar"   = 1452453066;

@@ -98,6 +98,8 @@
       dow = "cd ~/Downloads";
       home = "cd ~";
       # tools
+      # LLVM 22 ASan runtime for -sanitize:address (LLVM 20's hangs on macOS 27 beta).
+      odin-asan = "PATH=/opt/homebrew/opt/llvm@22/bin:$PATH odin";
       find = "fd";
       cat = "bat --paging=never";
       lst = "eza --tree";
