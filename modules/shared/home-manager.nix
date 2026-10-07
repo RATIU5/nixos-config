@@ -112,7 +112,7 @@
       search = ''rg -p --glob "!node_modules/*" --glob "!vendor/*" "$@"'';
       diff = "difft";
     };
-    initContent = lib.mkBefore ''
+    initContent = lib.mkMerge [ (lib.mkBefore ''
       if [[ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]]; then
         . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
         . /nix/var/nix/profiles/default/etc/profile.d/nix.sh
@@ -179,6 +179,7 @@
       # bun global CLIs (ctxio, openspec, …) — prefer over ~/.npm-packages
       export PATH="$HOME/.cache/.bun/bin:$PATH"
       export PATH="$HOME/.nub/bin:$PATH"
+      export PATH="$HOME/.bend/bin:$PATH"
       # nub's `install -g` links bins into pnpm's standard macOS global dir
       # (~/Library/pnpm), not ~/.nub/bin itself -- e.g. `nub install -g pake-cli`.
       export PNPM_HOME="$HOME/Library/pnpm"
@@ -537,7 +538,13 @@
         && [[ -z "''${INSIDE_EMACS:-}" ]]; then
         exec herdr
       fi
-    '';
+    '')
+    # Vite+ global CLI (`vp`, installed by modules/darwin/scripts/install-vite-plus.sh).
+    # Sourced after compinit so its zsh completions register.
+    ''
+      [ -f "$HOME/.vite-plus/env" ] && . "$HOME/.vite-plus/env"
+    ''
+    ];
   };
 
   git = {

@@ -202,6 +202,14 @@
           $DRY_RUN_CMD ${pkgs.writeShellScript "install-nub"
             (builtins.readFile ./scripts/install-nub.sh)}
         '';
+        # Install the Vite+ CLI (`vp`) via upstream curl installer into
+        # ~/.vite-plus. Homebrew's vite-plus formula lags (0.2.x). PATH comes
+        # from ~/.vite-plus/env, sourced in home-manager zshrc.
+        home.activation.installVitePlus = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          export PATH="${pkgs.curl}/bin:$PATH"
+          $DRY_RUN_CMD ${pkgs.writeShellScript "install-vite-plus"
+            (builtins.readFile ./scripts/install-vite-plus.sh)}
+        '';
       };
   };
 }
