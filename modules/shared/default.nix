@@ -80,6 +80,10 @@
             };
           };
       })
+      # atuin: e2e_capture pty test times out in the Darwin sandbox (flaky).
+      (final: prev: {
+        atuin = prev.atuin.overrideAttrs { doCheck = false; };
+      })
       # starship: same ld Trace/BPT trap on Darwin source builds.
       # Upstream ships a flat aarch64-apple-darwin tarball (just the binary).
       (final: prev: {
