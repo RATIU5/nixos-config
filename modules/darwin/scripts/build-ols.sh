@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Build OLS (Odin Language Server) from source against the Homebrew odin.
 # Runs during home-manager activation: clones on first run, rebuilds only
-# when the upstream master branch has new commits.
+# when the tracked ref changes. ols master needs a newer Odin than the Homebrew
+# release, so track the ols tag matching the installed Odin (dev-YYYY-MM) and
+# fall back to master when no such tag exists.
 set -euo pipefail
 
 OLS_DIR="$HOME/.local/share/ols"
@@ -18,13 +20,18 @@ mkdir -p "$BIN_DIR"
 
 NEEDS_BUILD=0
 
+ODIN_TAG="$("$ODIN_BIN" version | sed -E 's/.*(dev-[0-9]{4}-[0-9]{2}).*/\1/')"
+REF="refs/tags/$ODIN_TAG"
+
 if [[ ! -d "$OLS_DIR/.git" ]]; then
   echo "[ols] cloning..."
   rm -rf "$OLS_DIR"
-  git clone --depth 1 https://github.com/DanielGavin/ols "$OLS_DIR"
+  git clone --depth 1 --branch "$ODIN_TAG" https://github.com/DanielGavin/ols "$OLS_DIR" ||
+    git clone --depth 1 https://github.com/DanielGavin/ols "$OLS_DIR"
   NEEDS_BUILD=1
 else
-  if git -C "$OLS_DIR" fetch --depth 1 origin master 2>/dev/null; then
+  if git -C "$OLS_DIR" fetch --depth 1 origin "$REF" 2>/dev/null ||
+     git -C "$OLS_DIR" fetch --depth 1 origin master 2>/dev/null; then
     LOCAL=$(git -C "$OLS_DIR" rev-parse HEAD)
     REMOTE=$(git -C "$OLS_DIR" rev-parse FETCH_HEAD)
     if [[ "$LOCAL" != "$REMOTE" ]]; then
