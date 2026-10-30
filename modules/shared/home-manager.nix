@@ -520,24 +520,6 @@
 
         [ "$found" -eq 1 ] || printf 'No webapp-built apps found (registry entries no longer exist on disk).\n' >&2
       }
-
-      # Auto-start herdr only in a real interactive TTY (regular terminal
-      # windows: Ghostty, Terminal.app, iTerm, …). Skip IDE-embedded terminals,
-      # non-TTY GUI env capture (Zed, etc.), and anything already inside herdr.
-      if command -v herdr &>/dev/null \
-        && [[ -o interactive ]] \
-        && [[ -t 0 ]] \
-        && [[ -z "''${HERDR_ENV:-}" ]] \
-        && [[ -z "''${HERDR_PANE_ID:-}" ]] \
-        && [[ -z "''${TMUX:-}" ]] \
-        && [[ ! "$TERM" =~ screen ]] \
-        && [[ ! "$TERM" =~ tmux ]] \
-        && [[ "''${TERM_PROGRAM:-}" != "vscode" ]] \
-        && [[ "''${TERM_PROGRAM:-}" != "cursor" ]] \
-        && [[ -z "''${VSCODE_INJECTION:-}" ]] \
-        && [[ -z "''${INSIDE_EMACS:-}" ]]; then
-        exec herdr
-      fi
     '')
     # Vite+ global CLI (`vp`, installed by modules/darwin/scripts/install-vite-plus.sh).
     # Sourced after compinit so its zsh completions register.

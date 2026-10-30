@@ -169,14 +169,6 @@
             export PATH="${lib.getBin pkgs.bun}/bin:${lib.getBin pkgs.coreutils}/bin:$PATH"
             $DRY_RUN_CMD ${syncScript}
           '';
-        # Install Herdr's Pi lifecycle/session integration after the pi tree
-        # is synced (extensions dir must exist). Re-runs on every switch so a
-        # herdr upgrade refreshes the bundled extension.
-        home.activation.installHerdrIntegrations = lib.hm.dag.entryAfter [ "syncPiConfig" ] ''
-          export PATH="${lib.makeBinPath [ pkgs.herdr ]}:$PATH"
-          $DRY_RUN_CMD ${pkgs.writeShellScript "install-herdr-integrations"
-            (builtins.readFile ./scripts/install-herdr-integrations.sh)}
-        '';
         # Install @contextio/cli (LLM API proxy with redaction) via bun -g,
         # then ensure a background proxy is running so pi (via contextio-proxy.ts)
         # can route anthropic/openai/google/xai through it.
